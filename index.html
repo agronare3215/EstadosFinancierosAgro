@@ -6,59 +6,88 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Análisis Financiero Integral — Agronare</title>
 
-  <!-- Tailwind -->
+  <!-- Tailwind para estilos rápidos -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- html2pdf (para exportar a PDF) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- ExcelJS + FileSaver (para XLSX con logo embebido) -->
-  <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+  <!-- html2canvas (para PDF) -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- ExcelJS + FileSaver (para exportar XLSX con logo) -->
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
   <style>
+    /* Theme variables */
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #e6edf2;
+      --accent: #16a34a;
+      --accent-2: #3b82f6;
+      --danger: #ef4444;
+      --table-row: #f8fafc;
+      --input-bg: #ffffff;
+      --shadow: 0 6px 14px rgba(2, 6, 23, 0.06);
+    }
+
+    .dark {
+      --bg: #0b1220;
+      --card-bg: #0f1724;
+      --text: #e6eef8;
+      --muted: #9fb0c8;
+      --border: #1f2a37;
+      --accent: #34d399;
+      --accent-2: #60a5fa;
+      --danger: #fca5a5;
+      --table-row: #0b1622;
+      --input-bg: #0b1220;
+      --shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+    }
+
     body {
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: #f8fafc;
-      color: #0f172a;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 0.5rem;
     }
 
     .input-field {
       width: 100%;
-      max-width: 160px;
-      background: #f8fafc;
-      border: 1px solid #d1d5db;
+      max-width: 220px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 6px 8px;
-      text-align: right
+      text-align: right;
+      color: var(--text);
+    }
+
+    .input-left {
+      text-align: left;
     }
 
     .card-title {
       font-weight: 700;
-      color: #0f172a
-    }
-
-    .neg {
-      color: #dc2626
-    }
-
-    .pos {
-      color: #16a34a
+      color: var(--text);
     }
 
     .tab-button.active {
-      border-color: #16a34a;
-      color: #16a34a;
+      border-color: var(--accent);
+      color: var(--accent);
       font-weight: 600
-    }
-
-    .tab-button {
-      color: #475569;
-      border-color: transparent;
-    }
-
-    .tab-button:hover {
-      color: #1e293b;
     }
 
     .btn {
@@ -68,821 +97,1429 @@
       padding: 0.5rem 1rem;
       border-radius: 0.5rem;
       font-weight: 600;
-      transition: all 0.2s ease-in-out;
+      transition: all .12s;
+      cursor: pointer;
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
     }
 
     .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
     }
 
-    .print-container {
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
       box-shadow: none;
-      border: none;
     }
 
-    @media print {
-      .no-print {
-        display: none !important
-      }
+    .print-section {
+      page-break-inside: avoid;
+    }
 
-      body {
-        background: white !important
-      }
+    .small {
+      font-size: .85rem;
+      color: var(--muted);
+    }
 
-      .print-container {
-        box-shadow: none !important;
-        border: none !important;
-        margin: 0;
-        max-width: 100%;
-        padding: 0;
-      }
+    table td,
+    table th {
+      padding: 0.35rem 0.5rem;
+      vertical-align: middle;
+      color: var(--text);
+    }
 
-      .print-section {
-        display: block !important;
-        page-break-inside: avoid;
-        margin-top: 1.5rem
-      }
+    .total-cell {
+      background: var(--table-row);
+      font-weight: 700;
+    }
 
-      h1,
-      h2,
-      h3,
-      p,
-      span,
-      td,
-      th {
-        color: black !important
-      }
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      border: 0 !important;
+    }
 
-      .bg-gray-50,
-      .bg-slate-50 {
-        background-color: #f9fafb !important;
-      }
+    .pdf-temp-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card-bg);
+    }
 
-      .border {
-        border-color: #e5e7eb !important;
+    /* New utility classes to replace inline styles */
+    .accent {
+      color: var(--accent);
+    }
+
+    .accent2 {
+      color: var(--accent-2);
+    }
+
+    .pdf-header-logo {
+      height: 48px;
+      width: 48px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+
+    .pdf-header-text {
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+    }
+
+    .pdf-header-title {
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .pdf-header-date {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media (max-width:900px) {
+      .controls-grid {
+        grid-template-columns: repeat(2, 1fr)
       }
+    }
+
+    a.skip-link {
+      position: absolute;
+      left: -999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      z-index: -999;
+    }
+
+    a.skip-link:focus {
+      left: 1rem;
+      top: 1rem;
+      width: auto;
+      height: auto;
+      background: var(--card-bg);
+      padding: .5rem;
+      border-radius: .25rem;
+      z-index: 9999;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+    }
+
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .35rem .6rem;
+      border-radius: .35rem;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .detail-toggle {
+      background: transparent;
+      border: none;
+      color: var(--accent-2);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Loader spinner customization moved to CSS class */
+    .loader-spinner {
+      width: 4rem;
+      height: 4rem;
+      border-width: 0.5rem;
+      border-style: dashed;
+      border-radius: 9999px;
+      animation: spin 1s linear infinite;
+      border-color: rgba(0, 0, 0, 0.1);
+      /* fallback */
+    }
+
+    .loader-text {
+      margin-top: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Ensure accent color applied to spinner border */
+    body:not(.dark) .loader-spinner {
+      border-top-color: var(--accent);
+      border-right-color: rgba(0, 0, 0, 0.06);
+      border-bottom-color: rgba(0, 0, 0, 0.06);
+      border-left-color: rgba(0, 0, 0, 0.06);
+    }
+
+    body.dark .loader-spinner {
+      border-top-color: var(--accent);
+      border-right-color: rgba(255, 255, 255, 0.06);
+      border-bottom-color: rgba(255, 255, 255, 0.06);
+      border-left-color: rgba(255, 255, 255, 0.06);
     }
   </style>
 </head>
 
-<body class="antialiased">
+<body>
+  <!-- Enlace de salto para teclado -->
+  <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
 
-  <main id="app-root" class="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6 md:p-8 print-container">
-
-    <!-- HEADER con logo (actualiza src si lo necesitas) -->
-    <header class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 no-print">
+  <main id="main-content" role="main" class="max-w-7xl mx-auto my-4 p-6 md:p-8" aria-labelledby="app-title">
+    <!-- BANNER / HEADER -->
+    <header class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4 no-print" role="banner"
+      aria-describedby="banner-desc">
       <div class="flex items-center gap-4">
-        <!-- Cambia a "logoagro.png" si lo guardas localmente junto al HTML -->
-        <img id="companyLogoImg" src="logoagro.png" alt="Logo Agronare" class="h-16 w-16 rounded-md shadow-sm" />
+        <img id="companyLogoImg" alt="Logo de Agronare" class="h-16 w-16 rounded-md shadow-sm" />
         <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-green-700">Análisis Financiero Integral</h1>
-          <p class="text-sm text-slate-600 mt-0.5"><strong>Agronare</strong> — Herramienta para toma de decisiones
-            (balance, resultados, ratios y exportaciones).</p>
+          <h1 id="app-title" class="text-2xl md:text-3xl font-bold accent">Análisis Financiero Integral</h1>
+          <p id="banner-desc" class="small mt-0.5"><strong>Agronare</strong> — Reportes profesionales con logo en PDF y
+            Excel. Interfaz accesible.</p>
         </div>
       </div>
 
-      <div class="flex gap-2 flex-wrap no-print">
-        <button id="btn-save-json" class="btn bg-emerald-600 text-white">Guardar JSON</button>
-        <button id="btn-export-xlsx" class="btn bg-green-600 text-white">Exportar XLSX (con logo)</button>
-        <button id="btn-export-pdf" class="btn bg-sky-600 text-white">Exportar PDF</button>
-        <input id="file-load" type="file" accept=".json" class="hidden" aria-hidden="true" />
-        <button id="btn-load-json" class="btn bg-amber-500 text-white">Cargar JSON</button>
-        <button id="btn-undo" class="btn bg-gray-200" aria-label="Deshacer">Deshacer</button>
-        <button id="btn-reset" class="btn bg-rose-500 text-white">Reiniciar</button>
+      <div class="flex gap-2 flex-wrap no-print" role="toolbar" aria-label="Controles principales">
+        <button id="btn-save-json" class="btn" title="Guardar datos en un archivo JSON">Guardar JSON</button>
+        <button id="btn-export-xlsx" class="btn" title="Exportar todos los reportes a un archivo Excel (XLSX)">Exportar
+          XLSX</button>
+        <button id="btn-export-pdf" class="btn" title="Generar PDF con encabezado, marca de agua y numeración">Exportar
+          PDF</button>
+
+        <label for="file-load" class="sr-only">Cargar archivo JSON con datos</label>
+        <input id="file-load" type="file" accept=".json" class="hidden"
+          title="Cargue un archivo JSON con datos del informe" />
+
+        <button id="btn-load-json" class="btn" title="Cargar datos desde archivo JSON">Cargar JSON</button>
+        <button id="btn-save-local" class="btn" title="Guardar datos en almacenamiento local del navegador">Guardar en
+          navegador</button>
+        <button id="btn-clear-local" class="btn" title="Borrar los datos guardados localmente">Borrar guardados</button>
+        <button id="btn-reset" class="btn" title="Reiniciar todos los campos del formulario">Reiniciar</button>
+
+        <!-- Theme toggle -->
+        <button id="btn-theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Cambiar tema">
+          <span id="theme-icon">🌙</span>
+          <span id="theme-label" class="small">Oscuro</span>
+        </button>
       </div>
     </header>
 
-    <!-- INFO GENERAL -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 no-print" aria-label="Información principal">
-      <div>
-        <label for="companyName" class="text-sm font-medium text-slate-600">Nombre de la Empresa</label>
-        <input id="companyName" aria-label="Nombre de la empresa"
-          class="w-full bg-slate-50 border rounded-lg px-3 py-2 mt-1" value="Agronare S.A. de C.V." />
-      </div>
-      <div>
-        <label for="reportDate" class="text-sm font-medium text-slate-600">Fecha del Reporte</label>
-        <input id="reportDate" aria-label="Fecha del reporte" type="date"
-          class="w-full bg-slate-50 border rounded-lg px-3 py-2 mt-1" />
-      </div>
-      <div class="flex items-end">
-        <div class="w-full">
-          <label for="currencySelect" class="text-sm font-medium text-slate-600">Moneda</label>
-          <select id="currencySelect" aria-label="Seleccionar moneda"
-            class="w-full bg-slate-50 border rounded-lg px-3 py-2 mt-1">
-            <option value="MXN" selected>MXN (Pesos)</option>
-            <option value="USD">USD (Dólares)</option>
+    <!-- Área de estado (mensajes, guardado, errores) -->
+    <div id="app-status" role="status" aria-live="polite" class="sr-only"></div>
+
+    <!-- Opciones PDF (región con label) -->
+    <section role="region" aria-labelledby="pdf-options-title" class="mb-4 card p-3 rounded-lg border">
+      <h3 id="pdf-options-title" class="font-bold mb-2">Opciones para PDF</h3>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3 controls-grid">
+        <div>
+          <label for="pdfSize" class="small">Tamaño de página</label>
+          <select id="pdfSize" class="input-field input-left" title="Seleccionar el tamaño del papel para el PDF"
+            aria-describedby="pdfSize-desc">
+            <option value="a4">A4</option>
+            <option value="letter">Letter</option>
           </select>
+          <div id="pdfSize-desc" class="sr-only">Seleccione A4 o Letter para el tamaño del PDF.</div>
+        </div>
+
+        <div>
+          <label for="pdfOrientation" class="small">Orientación</label>
+          <select id="pdfOrientation" class="input-field input-left" title="Seleccionar orientación de página"
+            aria-describedby="pdfOrientation-desc">
+            <option value="portrait">Vertical</option>
+            <option value="landscape">Horizontal</option>
+          </select>
+          <div id="pdfOrientation-desc" class="sr-only">Orientación vertical u horizontal para el PDF.</div>
+        </div>
+
+        <div>
+          <label for="pdfScale" class="small">Escala de renderizado</label>
+          <input id="pdfScale" type="range" min="1" max="3" step="0.25" value="2" aria-label="Escala de render para PDF"
+            aria-describedby="pdfScale-desc" />
+          <div id="pdfScale-desc" class="sr-only">Controla el detalle del render (mayor escala = mejor resolución, mayor
+            tamaño).</div>
+          <div class="small mt-1">Escala: <span id="pdfScaleVal">2.00</span>x</div>
+        </div>
+
+        <div>
+          <label for="pdfHeaderLogo" class="small">Incluir logo en encabezado</label>
+          <div class="mt-1">
+            <input id="pdfHeaderLogo" type="checkbox" checked aria-labelledby="pdfHeaderLogoLabel" />
+            <label id="pdfHeaderLogoLabel" for="pdfHeaderLogo" class="small ml-2">Sí, incluir</label>
+          </div>
+        </div>
+
+        <div>
+          <label for="pdfWatermarkToggle" class="small">Marca de agua</label>
+          <div class="mt-1">
+            <input id="pdfWatermarkToggle" type="checkbox" checked aria-labelledby="pdfWatermarkToggleLabel" />
+            <label id="pdfWatermarkToggleLabel" for="pdfWatermarkToggle" class="small ml-2">Activar</label>
+          </div>
+        </div>
+
+        <div>
+          <label for="pdfWatermarkText" class="small">Texto de la marca</label>
+          <input id="pdfWatermarkText" class="input-field input-left" type="text" value="CONFIDENCIAL"
+            title="Texto que se colocará como marca de agua" aria-describedby="pdfWatermarkText-desc" />
+          <div id="pdfWatermarkText-desc" class="sr-only">Texto de marca de agua que aparecerá detrás del contenido.
+          </div>
+        </div>
+
+        <div>
+          <label for="pdfWatermarkOpacity" class="small">Opacidad</label>
+          <input id="pdfWatermarkOpacity" type="range" min="0.03" max="0.5" step="0.01" value="0.12"
+            aria-label="Opacidad de la marca de agua" aria-describedby="pdfWatermarkOpacity-desc" />
+          <div id="pdfWatermarkOpacity-desc" class="sr-only">Controla la opacidad de la marca de agua.</div>
+          <div class="small mt-1">Opacidad: <span id="pdfWatermarkOpacityVal">0.12</span></div>
+        </div>
+
+        <div>
+          <label for="pdfWatermarkSize" class="small">Tamaño marca</label>
+          <input id="pdfWatermarkSize" type="range" min="24" max="160" step="2" value="72"
+            aria-label="Tamaño de la marca de agua" aria-describedby="pdfWatermarkSize-desc" />
+          <div id="pdfWatermarkSize-desc" class="sr-only">Controla el tamaño de la marca de agua (en px).</div>
+          <div class="small mt-1">Tamaño: <span id="pdfWatermarkSizeVal">72</span>px</div>
+        </div>
+
+        <div>
+          <label for="pdfPageNumbersToggle" class="small">Numeración de páginas</label>
+          <div class="mt-1">
+            <input id="pdfPageNumbersToggle" type="checkbox" checked aria-labelledby="pdfPageNumbersToggleLabel" />
+            <label id="pdfPageNumbersToggleLabel" for="pdfPageNumbersToggle" class="small ml-2">Incluir números de
+              página</label>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- TABS -->
-    <nav class="mb-4 no-print">
-      <div class="flex gap-2 border-b border-gray-200">
-        <button id="tab-datos" class="tab-button px-4 py-2 border-b-2">1. Ingresar Datos</button>
-        <button id="tab-balance" class="tab-button px-4 py-2 border-b-2">2. Balance General</button>
-        <button id="tab-resultados" class="tab-button px-4 py-2 border-b-2">3. Estado de Resultados</button>
-        <button id="tab-ratios" class="tab-button px-4 py-2 border-b-2">4. Ratios</button>
-        <button id="tab-graficos" class="tab-button px-4 py-2 border-b-2">5. Gráficos</button>
+    <!-- Información general (formulario) -->
+    <form id="main-form" role="form" aria-labelledby="form-title" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <h2 id="form-title" class="sr-only">Formulario de datos financieros</h2>
+
+      <div>
+        <label for="companyName" class="small">Empresa</label>
+        <input id="companyName" class="w-full bg-slate-50 border rounded-lg px-3 py-2 mt-1 input-left input-field"
+          value="Agronare S.A. de C.V." title="Nombre de la empresa — visible en encabezados" />
+      </div>
+
+      <div>
+        <label for="reportDate" class="small">Fecha del reporte</label>
+        <input id="reportDate" type="date"
+          class="w-full bg-slate-50 border rounded-lg px-3 py-2 mt-1 input-left input-field"
+          title="Fecha del reporte" />
+      </div>
+
+      <div>
+        <label for="currencySelect" class="small">Moneda</label>
+        <select id="currencySelect" class="w-full bg-slate-50 border rounded-lg px-3 py-2 mt-1 input-left input-field"
+          title="Seleccionar moneda para mostrar valores">
+          <option value="MXN" selected>MXN</option>
+          <option value="USD">USD</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="reportNotes" class="small">Notas del reporte</label>
+        <input id="reportNotes" class="w-full bg-slate-50 border rounded-lg px-3 py-2 mt-1 input-left input-field"
+          placeholder="Notas (opcional)" title="Notas descriptivas opcionales del reporte" />
+      </div>
+    </form>
+
+    <!-- NUEVO: Opciones de Reportes -->
+    <section role="region" aria-labelledby="report-options-title" class="mb-4 card p-3 rounded-lg border">
+      <h3 id="report-options-title" class="font-bold mb-2">Opciones de Reportes</h3>
+      <div class="flex items-center gap-4">
+        <div>
+          <label for="verticalAnalysisToggle" class="small">Análisis Vertical</label>
+          <div class="mt-1 flex items-center">
+            <input id="verticalAnalysisToggle" type="checkbox" aria-labelledby="verticalAnalysisToggleLabel" />
+            <label id="verticalAnalysisToggleLabel" for="verticalAnalysisToggle" class="small ml-2">Mostrar porcentajes
+              (%) en reportes de Balance y Resultados</label>
+          </div>
+        </div>
+        <div>
+          <label for="showDetailsToggle" class="small">Mostrar detalles</label>
+          <div class="mt-1 flex items-center">
+            <input id="showDetailsToggle" type="checkbox" aria-labelledby="showDetailsToggleLabel" />
+            <label id="showDetailsToggleLabel" for="showDetailsToggle" class="small ml-2">Expandir partidas
+              desglosadas en estados</label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABS accesibles (modificado para ARIA) -->
+    <nav role="navigation" aria-label="Secciones del reporte" class="mb-4 no-print">
+      <div class="flex gap-2 border-b border-gray-200 flex-wrap" role="tablist" aria-label="Pestañas del reporte">
+        <button id="tab-datos" class="tab-button px-4 py-2 border-b-2 active" role="tab" aria-controls="content-datos"
+          aria-selected="true" tabindex="0">1. Ingresar Datos</button>
+        <button id="tab-balance" class="tab-button px-4 py-2 border-b-2" role="tab" aria-controls="content-balance"
+          aria-selected="false" tabindex="-1">2. Balance</button>
+        <button id="tab-resultados" class="tab-button px-4 py-2 border-b-2" role="tab"
+          aria-controls="content-resultados" aria-selected="false" tabindex="-1">3. Estado Resultados</button>
+        <button id="tab-flujos" class="tab-button px-4 py-2 border-b-2" role="tab" aria-controls="content-flujos"
+          aria-selected="false" tabindex="-1">4. Flujos</button>
+        <button id="tab-patrimonio" class="tab-button px-4 py-2 border-b-2" role="tab"
+          aria-controls="content-patrimonio" aria-selected="false" tabindex="-1">5. Patrimonio</button>
+        <button id="tab-graficos" class="tab-button px-4 py-2 border-b-2" role="tab" aria-controls="content-graficos"
+          aria-selected="false" tabindex="-1">6. Gráficos y Ratios</button>
       </div>
     </nav>
 
-    <!-- CONTENT -->
-    <div id="content-container">
-      <!-- DATOS (misma estructura que pegaste) -->
-      <section id="content-datos" class="tab-content">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- Activos -->
-          <div class="bg-slate-50 p-4 rounded-lg border">
-            <h3 class="card-title mb-2">Activo Circulante</h3>
-            <div class="space-y-2">
-              <label for="caja_bancos" class="flex justify-between items-center"><span>Caja y Bancos</span><input
-                  id="caja_bancos" aria-label="Caja y Bancos" class="input-field" type="number" step="0.01" /></label>
-              <label for="inversiones_temp" class="flex justify-between items-center"><span>Inversiones
-                  Temporales</span><input id="inversiones_temp" aria-label="Inversiones Temporales" class="input-field"
-                  type="number" step="0.01" /></label>
-              <label for="clientes" class="flex justify-between items-center"><span>Clientes</span><input id="clientes"
-                  aria-label="Clientes" class="input-field" type="number" step="0.01" /></label>
-              <label for="inventarios" class="flex justify-between items-center"><span>Inventarios</span><input
-                  id="inventarios" aria-label="Inventarios" class="input-field" type="number" step="0.01" /></label>
-            </div>
+    <!-- CONTENIDO: DATOS, BALANCE, RESULTADOS, FLUJOS, PATRIMONIO, GRAFICOS -->
+    <div id="content-container" role="region" aria-live="polite">
+
+      <!-- 1) DATOS: activos (un bloque) y pasivos (otro bloque) -->
+      <section id="content-datos" class="tab-content" role="tabpanel" aria-labelledby="tab-datos" tabindex="0"
+        aria-hidden="false">
+        <h3 id="datos-title" class="sr-only">Ingreso de datos</h3>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="card p-4" role="group" aria-labelledby="activos-title">
+            <h4 id="activos-title" class="card-title mb-2">ACTIVOS</h4>
+
+            <label for="caja" class="block small">Caja</label>
+            <input id="caja" class="input-field" type="number" step="0.01" title="Caja (activo circulante)" />
+
+            <label for="bancos" class="block small mt-2">Bancos</label>
+            <input id="bancos" class="input-field" type="number" step="0.01" title="Saldo en bancos" />
+
+            <label for="cxp" class="block small mt-2">Cuentas por cobrar</label>
+            <input id="cxp" class="input-field" type="number" step="0.01" title="Cuentas por cobrar (clientes)" />
+
+            <label for="inventarios" class="block small mt-2">Inventarios</label>
+            <input id="inventarios" class="input-field" type="number" step="0.01" title="Inventarios" />
+
+            <label for="anticipos" class="block small mt-2">Anticipos y otros corrientes</label>
+            <input id="anticipos" class="input-field" type="number" step="0.01"
+              title="Anticipos y otros activos corrientes" />
+
             <hr class="my-3" />
-            <h3 class="card-title mb-2">Activo Fijo (Bruto / Depreciación)</h3>
-            <div class="space-y-2">
-              <label for="terrenos_edificios" class="flex justify-between items-center"><span>Terrenos y
-                  Edificios</span><input id="terrenos_edificios" aria-label="Terrenos y Edificios" class="input-field"
-                  type="number" step="0.01" /></label>
-              <label for="maquinaria_equipo" class="flex justify-between items-center"><span>Maquinaria y
-                  Equipo</span><input id="maquinaria_equipo" aria-label="Maquinaria y Equipo" class="input-field"
-                  type="number" step="0.01" /></label>
-              <label for="equipo_transporte" class="flex justify-between items-center"><span>Equipo de
-                  Transporte</span><input id="equipo_transporte" aria-label="Equipo de Transporte" class="input-field"
-                  type="number" step="0.01" /></label>
-              <label for="depreciacion" class="flex justify-between items-center"><span>(-) Depreciación
-                  Acum.</span><input id="depreciacion" aria-label="Depreciación Acumulada" class="input-field"
-                  type="number" step="0.01" /></label>
-            </div>
+
+            <label for="terrenos" class="block small mt-2">Terrenos (bruto)</label>
+            <input id="terrenos" class="input-field" type="number" step="0.01" title="Terrenos (valor bruto)" />
+
+            <label for="maquinaria" class="block small mt-2">Maquinaria (bruto)</label>
+            <input id="maquinaria" class="input-field" type="number" step="0.01" title="Maquinaria (valor bruto)" />
+
+            <label for="vehiculos" class="block small mt-2">Vehículos (bruto)</label>
+            <input id="vehiculos" class="input-field" type="number" step="0.01" title="Vehículos (valor bruto)" />
+
+            <label for="depreciacion_acum" class="block small mt-2">Depreciación acumulada</label>
+            <input id="depreciacion_acum" class="input-field" type="number" step="0.01"
+              title="Depreciación acumulada de activos" />
+
+            <label for="intangibles" class="block small mt-2">Intangibles (neto)</label>
+            <input id="intangibles" class="input-field" type="number" step="0.01" title="Activos intangibles (neto)" />
           </div>
 
-          <!-- Pasivos y Patrimonio -->
-          <div class="bg-slate-50 p-4 rounded-lg border">
-            <h3 class="card-title mb-2">Pasivo Circulante</h3>
-            <div class="space-y-2">
-              <label for="proveedores" class="flex justify-between items-center"><span>Proveedores</span><input
-                  id="proveedores" aria-label="Proveedores" class="input-field" type="number" step="0.01" /></label>
-              <label for="acreedores" class="flex justify-between items-center"><span>Acreedores Diversos</span><input
-                  id="acreedores" aria-label="Acreedores Diversos" class="input-field" type="number"
-                  step="0.01" /></label>
-              <label for="prestamos_corto" class="flex justify-between items-center"><span>Préstamos Corto
-                  Plazo</span><input id="prestamos_corto" aria-label="Préstamos Corto Plazo" class="input-field"
-                  type="number" step="0.01" /></label>
-              <label for="impuestos_pagar" class="flex justify-between items-center"><span>Impuestos por
-                  Pagar</span><input id="impuestos_pagar" aria-label="Impuestos por Pagar" class="input-field"
-                  type="number" step="0.01" /></label>
-            </div>
+          <div class="card p-4" role="group" aria-labelledby="pasivos-title">
+            <h4 id="pasivos-title" class="card-title mb-2">PASIVOS Y PATRIMONIO</h4>
+
+            <label for="proveedores" class="block small">Proveedores</label>
+            <input id="proveedores" class="input-field" type="number" step="0.01" title="Deuda con proveedores" />
+
+            <label for="prestamos_cp" class="block small mt-2">Préstamos corto plazo</label>
+            <input id="prestamos_cp" class="input-field" type="number" step="0.01" title="Préstamos corto plazo" />
+
+            <label for="impuestos_pagar" class="block small mt-2">Impuestos por pagar</label>
+            <input id="impuestos_pagar" class="input-field" type="number" step="0.01" title="Impuestos por pagar" />
+
+            <label for="otras_corrientes" class="block small mt-2">Otras obligaciones corrientes</label>
+            <input id="otras_corrientes" class="input-field" type="number" step="0.01"
+              title="Otras obligaciones corrientes" />
+
             <hr class="my-3" />
-            <h3 class="card-title mb-2">Pasivo Largo Plazo / Patrimonio</h3>
-            <div class="space-y-2">
-              <label for="prestamos_largo" class="flex justify-between items-center"><span>Préstamos Largo
-                  Plazo</span><input id="prestamos_largo" aria-label="Préstamos Largo Plazo" class="input-field"
-                  type="number" step="0.01" /></label>
-              <label for="capital_social" class="flex justify-between items-center"><span>Capital Social</span><input
-                  id="capital_social" aria-label="Capital Social" class="input-field" type="number"
-                  step="0.01" /></label>
-              <label for="utilidades_retenidas" class="flex justify-between items-center"><span>Utilidades
-                  Retenidas</span><input id="utilidades_retenidas" aria-label="Utilidades Retenidas" class="input-field"
-                  type="number" step="0.01" /></label>
-            </div>
+
+            <label for="deuda_lp" class="block small mt-2">Deuda largo plazo</label>
+            <input id="deuda_lp" class="input-field" type="number" step="0.01" title="Deuda largo plazo" />
+
+            <label for="provisiones_lp" class="block small mt-2">Provisiones y pasivos no corrientes</label>
+            <input id="provisiones_lp" class="input-field" type="number" step="0.01"
+              title="Provisiones a largo plazo" />
+
+            <hr class="my-3" />
+
+            <label for="capital_social" class="block small mt-2">Capital social</label>
+            <input id="capital_social" class="input-field" type="number" step="0.01" title="Capital social" />
+
+            <label for="reservas" class="block small mt-2">Reservas</label>
+            <input id="reservas" class="input-field" type="number" step="0.01" title="Reservas" />
+
+            <label for="utilidades_retenidas" class="block small mt-2">Utilidades retenidas (inicio)</label>
+            <input id="utilidades_retenidas" class="input-field" type="number" step="0.01"
+              title="Utilidades retenidas al inicio del periodo" />
           </div>
 
-          <!-- Estado de Resultados -->
-          <div class="bg-slate-50 p-4 rounded-lg border">
-            <h3 class="card-title mb-2">Estado de Resultados</h3>
-            <div class="space-y-2">
-              <label for="ingresos_ventas" class="flex justify-between items-center"><span>Ingresos por
-                  Ventas</span><input id="ingresos_ventas" aria-label="Ingresos por Ventas" class="input-field"
-                  type="number" step="0.01" /></label>
-              <label for="costo_ventas" class="flex justify-between items-center"><span>Costo de Ventas</span><input
-                  id="costo_ventas" aria-label="Costo de Ventas" class="input-field" type="number"
-                  step="0.01" /></label>
-            </div>
-            <hr class="my-3" />
-            <h4 class="font-semibold">Gastos Operativos</h4>
-            <div class="space-y-2">
-              <label for="gastos_sueldos" class="flex justify-between items-center"><span>Sueldos y
-                  Salarios</span><input id="gastos_sueldos" aria-label="Sueldos y Salarios" class="input-field"
-                  type="number" step="0.01" /></label>
-              <label for="gastos_renta" class="flex justify-between items-center"><span>Renta y Alquileres</span><input
-                  id="gastos_renta" aria-label="Renta y Alquileres" class="input-field" type="number"
-                  step="0.01" /></label>
-              <label for="gastos_servicios" class="flex justify-between items-center"><span>Servicios
-                  Públicos</span><input id="gastos_servicios" aria-label="Servicios Públicos" class="input-field"
-                  type="number" step="0.01" /></label>
-              <label for="gastos_publicidad" class="flex justify-between items-center"><span>Publicidad y
-                  Marketing</span><input id="gastos_publicidad" aria-label="Publicidad y Marketing" class="input-field"
-                  type="number" step="0.01" /></label>
-            </div>
-            <hr class="my-3" />
-            <div class="space-y-2">
-              <label for="gastos_financieros" class="flex justify-between items-center"><span>Gastos
-                  Financieros</span><input id="gastos_financieros" aria-label="Gastos Financieros" class="input-field"
-                  type="number" step="0.01" /></label>
-              <label for="impuestos_isr" class="flex justify-between items-center"><span>Impuestos (ISR)</span><input
-                  id="impuestos_isr" aria-label="Impuestos ISR" class="input-field" type="number" step="0.01" /></label>
-            </div>
-          </div>
+          <div class="card p-4" role="group" aria-labelledby="er-title">
+            <h4 id="er-title" class="card-title mb-2">ESTADO DE RESULTADOS</h4>
 
+            <label for="ventas_net" class="block small">Ventas netas</label>
+            <input id="ventas_net" class="input-field" type="number" step="0.01" title="Ventas netas" />
+
+            <label for="devoluciones" class="block small mt-2">Devoluciones</label>
+            <input id="devoluciones" class="input-field" type="number" step="0.01" title="Devoluciones sobre ventas" />
+
+            <label for="costo_ventas" class="block small mt-2">Costo de ventas</label>
+            <input id="costo_ventas" class="input-field" type="number" step="0.01" title="Costo de ventas" />
+
+            <hr class="my-3" />
+
+            <label for="gasto_sueldos" class="block small mt-2">Sueldos</label>
+            <input id="gasto_sueldos" class="input-field" type="number" step="0.01" title="Gasto en sueldos" />
+
+            <label for="gasto_renta" class="block small mt-2">Renta</label>
+            <input id="gasto_renta" class="input-field" type="number" step="0.01" title="Gasto por rentas" />
+
+            <label for="gasto_marketing" class="block small mt-2">Marketing</label>
+            <input id="gasto_marketing" class="input-field" type="number" step="0.01"
+              title="Gasto en publicidad y marketing" />
+
+            <label for="gasto_depreciacion" class="block small mt-2">Depreciación (gasto)</label>
+            <input id="gasto_depreciacion" class="input-field" type="number" step="0.01"
+              title="Gasto por depreciación" />
+
+            <label for="gasto_intereses" class="block small mt-2">Intereses</label>
+            <input id="gasto_intereses" class="input-field" type="number" step="0.01"
+              title="Gastos financieros (intereses)" />
+
+            <label for="impuestos_calc" class="block small mt-2">Impuestos estimados</label>
+            <input id="impuestos_calc" class="input-field" type="number" step="0.01"
+              title="Impuestos estimados (ISR)" />
+          </div>
         </div>
 
-        <!-- RESUMEN -->
-        <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white p-4 border rounded-lg">
-            <p class="text-sm text-slate-500">Total Activos</p>
-            <p id="card-total-activos" class="text-xl font-bold mt-1">MXN 0.00</p>
+        <!-- Flujos e inversión / financiación -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div class="card p-4" role="group" aria-labelledby="flujos-title">
+            <h4 id="flujos-title" class="card-title mb-2">Flujos de operación</h4>
+            <label for="delta_cxc" class="block small">Δ CxC (cambios)</label>
+            <input id="delta_cxc" class="input-field" type="number" step="0.01"
+              title="Incremento o disminución en cuentas por cobrar" />
+            <label for="delta_inventarios" class="block small mt-2">Δ Inventarios</label>
+            <input id="delta_inventarios" class="input-field" type="number" step="0.01" title="Cambio en inventarios" />
+            <label for="delta_cxp" class="block small mt-2">Δ CxP</label>
+            <input id="delta_cxp" class="input-field" type="number" step="0.01" title="Cambio en cuentas por pagar" />
           </div>
-          <div class="bg-white p-4 border rounded-lg">
-            <p class="text-sm text-slate-500">Total Pasivos</p>
-            <p id="card-total-pasivos" class="text-xl font-bold mt-1">MXN 0.00</p>
+
+          <div class="card p-4" role="group" aria-labelledby="inversion-title">
+            <h4 id="inversion-title" class="card-title mb-2">Inversión</h4>
+            <label for="capex" class="block small">CAPEX (compras)</label>
+            <input id="capex" class="input-field" type="number" step="0.01" title="Gastos de inversión (CAPEX)" />
+            <label for="venta_activo" class="block small mt-2">Venta de activos</label>
+            <input id="venta_activo" class="input-field" type="number" step="0.01"
+              title="Ingresos por venta de activos" />
           </div>
-          <div class="bg-white p-4 border rounded-lg">
-            <p class="text-sm text-slate-500">Total Patrimonio</p>
-            <p id="card-total-patrimonio" class="text-xl font-bold mt-1">MXN 0.00</p>
-          </div>
-          <div class="bg-white p-4 border rounded-lg">
-            <p class="text-sm text-slate-500">Utilidad Neta</p>
-            <p id="card-utilidad-neta" class="text-xl font-bold mt-1">MXN 0.00</p>
+
+          <div class="card p-4" role="group" aria-labelledby="financ-title">
+            <h4 id="financ-title" class="card-title mb-2">Financiación</h4>
+            <label for="deuda_emitida" class="block small">Deuda emitida</label>
+            <input id="deuda_emitida" class="input-field" type="number" step="0.01" title="Nueva deuda emitida" />
+            <label for="deuda_pagada" class="block small mt-2">Deuda pagada</label>
+            <input id="deuda_pagada" class="input-field" type="number" step="0.01" title="Deuda pagada" />
+            <label for="dividendos_pag" class="block small mt-2">Dividendos pagados</label>
+            <input id="dividendos_pag" class="input-field" type="number" step="0.01" title="Dividendos y retiros" />
           </div>
         </div>
       </section>
 
-      <section id="content-balance" class="tab-content hidden print-section mt-6"></section>
-      <section id="content-resultados" class="tab-content hidden print-section mt-6"></section>
-      <section id="content-ratios" class="tab-content hidden print-section mt-6"></section>
+      <!-- 2) BALANCE -->
+      <section id="content-balance" class="tab-content hidden print-section mt-6 card p-4" role="tabpanel"
+        aria-labelledby="tab-balance" tabindex="0" aria-hidden="true">
+        <h3 id="balance-title" class="sr-only">Balance general</h3>
+      </section>
 
-      <section id="content-graficos" class="tab-content hidden mt-6">
-        <h2 class="text-xl font-bold mb-4">Visualizaciones</h2>
+      <!-- 3) RESULTADOS -->
+      <section id="content-resultados" class="tab-content hidden print-section mt-6 card p-4" role="tabpanel"
+        aria-labelledby="tab-resultados" tabindex="0" aria-hidden="true">
+        <h3 id="resultados-title" class="sr-only">Estado de resultados</h3>
+      </section>
+
+      <!-- 4) FLUJOS -->
+      <section id="content-flujos" class="tab-content hidden print-section mt-6 card p-4" role="tabpanel"
+        aria-labelledby="tab-flujos" tabindex="0" aria-hidden="true">
+        <h3 id="flujos-report-title" class="sr-only">Flujos de efectivo</h3>
+      </section>
+
+      <!-- 5) PATRIMONIO -->
+      <section id="content-patrimonio" class="tab-content hidden print-section mt-6 card p-4" role="tabpanel"
+        aria-labelledby="tab-patrimonio" tabindex="0" aria-hidden="true">
+        <h3 id="patrimonio-title" class="sr-only">Cambio en patrimonio</h3>
+      </section>
+
+      <!-- 6) GRAFICOS -->
+      <section id="content-graficos" class="tab-content hidden mt-6" role="tabpanel" aria-labelledby="tab-graficos"
+        tabindex="0" aria-hidden="true">
+        <h3 id="graficos-title" class="text-xl font-bold mb-4">Gráficos y Ratios Financieros</h3>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="bg-slate-50 p-4 rounded-lg border h-72">
-            <h4 class="font-semibold mb-2">Activos vs Pasivo+Patrimonio</h4><canvas id="chart-balance"
-              class="h-52"></canvas>
+          <div class="card p-4 h-72">
+            <h4 class="font-semibold mb-2">Activos vs Pasivos y Patrimonio</h4>
+            <canvas id="chart-balance" class="h-52" aria-label="Gráfico comparativo de activos y pasivos"></canvas>
           </div>
-          <div class="bg-slate-50 p-4 rounded-lg border h-72">
-            <h4 class="font-semibold mb-2">Composición del Resultado</h4><canvas id="chart-resultados"
-              class="h-52"></canvas>
+
+          <div class="card p-4 h-72">
+            <h4 class="font-semibold mb-2">Composición del Resultado</h4>
+            <canvas id="chart-result" class="h-52" aria-label="Gráfico de composición de resultado"></canvas>
           </div>
-          <div class="bg-slate-50 p-4 rounded-lg border h-72">
-            <h4 class="font-semibold mb-2">Estructura del Activo</h4><canvas id="chart-activos" class="h-52"></canvas>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div class="card p-4 text-center">
+            <div class="text-sm small">Razón Circulante</div>
+            <div id="ratio-liquidez" class="text-2xl font-bold mt-1">-</div>
           </div>
-          <div class="bg-slate-50 p-4 rounded-lg border h-72">
-            <h4 class="font-semibold mb-2">Estructura Pasivo/Patrimonio</h4><canvas id="chart-paspat"
-              class="h-52"></canvas>
+          <div class="card p-4 text-center">
+            <div class="text-sm small">Endeudamiento</div>
+            <div id="ratio-endeudamiento" class="text-2xl font-bold mt-1">-</div>
+          </div>
+          <div class="card p-4 text-center">
+            <div class="text-sm small">Margen Neto</div>
+            <div id="ratio-margen" class="text-2xl font-bold mt-1">-</div>
+          </div>
+          <div class="card p-4 text-center">
+            <div class="text-sm small">ROA</div>
+            <div id="ratio-roa" class="text-2xl font-bold mt-1">-</div>
+          </div>
+          <div class="card p-4 text-center">
+            <div class="text-sm small">ROE</div>
+            <div id="ratio-roe" class="text-2xl font-bold mt-1">-</div>
           </div>
         </div>
       </section>
+
     </div>
 
     <div class="mt-6 flex justify-center gap-3 no-print">
-      <button id="btn-save-local" class="btn bg-emerald-500 text-white">Guardar en navegador</button>
-      <button id="btn-clear-local" class="btn bg-rose-500 text-white">Borrar guardados</button>
+      <button id="btn-preview" class="btn" title="Actualizar y previsualizar todos los reportes">Actualizar &
+        Previsualizar</button>
     </div>
 
   </main>
 
+  <!-- Modal de Confirmación -->
+  <div id="confirm-modal" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center hidden z-50"
+    role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
+      <h3 id="modal-title" class="text-lg font-bold">Confirmación Requerida</h3>
+      <p id="modal-message" class="my-4 text-slate-600">¿Está seguro de que desea continuar?</p>
+      <div class="flex justify-end gap-3">
+        <button id="modal-cancel" class="btn bg-gray-200">Cancelar</button>
+        <button id="modal-confirm" class="btn bg-rose-500 text-white">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicador de Carga -->
+  <div id="loader" class="fixed inset-0 bg-white bg-opacity-80 flex flex-col items-center justify-center hidden z-50"
+    role="status" aria-live="assertive">
+    <div class="loader-spinner" aria-hidden="true"></div>
+    <p class="loader-text">Procesando, por favor espere...</p>
+  </div>
+
+
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      /* --- Estado y utilidades --- */
-      const LS_KEY = 'agronare_financiero_v6';
-      const undoStack = [];
-      const UNDO_MAX = 12;
-
-      const inputIds = [
-        'caja_bancos', 'inversiones_temp', 'clientes', 'inventarios',
-        'terrenos_edificios', 'maquinaria_equipo', 'equipo_transporte', 'depreciacion',
-        'proveedores', 'acreedores', 'prestamos_corto', 'impuestos_pagar',
-        'prestamos_largo', 'capital_social', 'utilidades_retenidas',
-        'ingresos_ventas', 'costo_ventas', 'gastos_sueldos', 'gastos_renta',
-        'gastos_servicios', 'gastos_publicidad', 'gastos_financieros', 'impuestos_isr'
-      ];
-      const textInputIds = ['companyName', 'reportDate', 'currencySelect'];
-      const allInputIds = [...inputIds, ...textInputIds];
+    (function () {
+      /* ----- Logo SVG embebido (data URL) ----- */
+      const logoSVG = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="400" height="160" viewBox="0 0 400 160">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#06b6d4"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+          <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#84cc16"/></linearGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="white" rx="10"/>
+        <g transform="translate(40,10)">
+          <path d="M40 20 C 10 40, 10 80, 40 100 C 80 120, 120 80, 100 40 C 88 12, 60 -4, 40 20 Z" fill="url(#g1)"/>
+          <path d="M170 10 C 210 40, 220 90, 170 120 C 110 150, 60 130, 100 90 C 130 60, 170 10, 170 10 Z" fill="url(#g2)"/>
+        </g>
+        <text x="200" y="110" font-family="Georgia, serif" font-weight="700" font-size="36" fill="#0f5132">AGRONARE</text>
+      </svg>`;
+      const svgBase64 = btoa(unescape(encodeURIComponent(logoSVG)));
+      const logoDataUrl = 'data:image/svg+xml;base64,' + svgBase64;
       const $ = id => document.getElementById(id);
+      if ($('companyLogoImg')) $('companyLogoImg').src = logoDataUrl;
 
-      function getNumberValue(id) {
-        const el = $(id); if (!el) return 0;
-        const raw = parseFloat(el.value); return Number.isFinite(raw) ? raw : 0;
-      }
-      function formatMoney(num) {
-        const cur = $('currencySelect') ? $('currencySelect').value || 'MXN' : 'MXN';
-        return new Intl.NumberFormat('es-MX', { style: 'currency', currency: cur }).format(num || 0);
-      }
-      function formatNumber(num) {
-        return new Intl.NumberFormat('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number.isFinite(num) ? num : 0);
-      }
+      let chartBalance = null;
+      let chartResult = null;
 
-      function pushUndo() {
-        try {
-          const snap = JSON.stringify(collectFormValues());
-          if (undoStack.length > 0 && undoStack[undoStack.length - 1] === snap) return;
-          undoStack.push(snap);
-          if (undoStack.length > UNDO_MAX) undoStack.shift();
-          $('btn-undo').disabled = undoStack.length <= 1;
-        } catch (e) { console.error(e) }
-      }
-      function undo() {
-        if (undoStack.length <= 1) { alert('No hay más cambios para deshacer.'); return; }
-        undoStack.pop();
-        const prev = undoStack[undoStack.length - 1];
-        if (prev) { applyDataToForm(JSON.parse(prev)); updateUI(false); alert('Cambio deshecho.'); }
-        $('btn-undo').disabled = undoStack.length <= 1;
-      }
+      /* ----- Utilidades ----- */
+      const LS_KEY = 'agronare_fin_v8_enhanced';
+      const THEME_KEY = 'agronare_theme_v1';
+      const inputIds = [
+        'caja', 'bancos', 'cxp', 'inventarios', 'anticipos', 'terrenos', 'maquinaria', 'vehiculos', 'depreciacion_acum', 'intangibles',
+        'proveedores', 'prestamos_cp', 'impuestos_pagar', 'otras_corrientes', 'deuda_lp', 'provisiones_lp', 'capital_social', 'reservas', 'utilidades_retenidas',
+        'ventas_net', 'devoluciones', 'costo_ventas', 'gasto_sueldos', 'gasto_renta', 'gasto_marketing', 'gasto_depreciacion', 'gasto_intereses', 'impuestos_calc',
+        'delta_cxc', 'delta_inventarios', 'delta_cxp', 'capex', 'venta_activo', 'deuda_emitida', 'deuda_pagada', 'dividendos_pag'
+      ];
 
-      function collectFormValues() {
-        const data = {};
-        allInputIds.forEach(id => {
-          const el = $(id); if (!el) { data[id] = null; return; }
-          if (el.type === 'date' || el.tagName === 'SELECT' || el.type === 'text') data[id] = el.value || '';
-          else data[id] = (el.value === '' ? '' : Number(el.value));
-        });
-        return data;
-      }
-      function applyDataToForm(data) {
-        if (!data) return;
-        allInputIds.forEach(id => {
-          const el = $(id); if (!el) return;
-          const value = data[id];
-          if (el.type === 'date' || el.tagName === 'SELECT' || el.type === 'text') el.value = value || '';
-          else el.value = (value === '' || value === null || typeof value === 'undefined') ? '' : String(value);
+      function getNum(id) { const el = $(id); if (!el) return 0; const v = parseFloat(el.value); return Number.isFinite(v) ? v : 0; }
+      function currency() { return ($('currencySelect') ? $('currencySelect').value : 'MXN'); }
+      function formatMoney(n) { return new Intl.NumberFormat('es-MX', { style: 'currency', currency: currency() || 'MXN' }).format(Number.isFinite(n) ? n : 0); }
+      function fmtNum(n) { return new Intl.NumberFormat('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number.isFinite(n) ? n : 0); }
+
+      /* Convertir SVG a PNG Data URL (para Excel y PDF) */
+      function svgToPngDataUrl(svgText, width = 400, height = 160) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = width; canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/png'));
+          };
+          img.onerror = e => reject(e);
+          img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgText)));
         });
       }
 
-      /* --- Guardado local / JSON --- */
-      function saveToLocal(show = true) {
-        try { localStorage.setItem(LS_KEY, JSON.stringify(collectFormValues())); if (show) alert('Datos guardados localmente.'); }
-        catch (e) { console.error(e); alert('Error guardando localmente.'); }
-      }
-      function loadFromLocal() {
-        const raw = localStorage.getItem(LS_KEY); if (!raw) { alert('No hay datos guardados.'); return; }
-        pushUndo(); applyDataToForm(JSON.parse(raw)); updateUI(); alert('Datos recuperados.');
-      }
-      function clearLocal() { if (!confirm('¿Borrar datos guardados?')) return; localStorage.removeItem(LS_KEY); alert('Datos eliminados.'); }
-
-      function saveToJsonFile() {
-        const data = collectFormValues();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `agronare_analisis_${(new Date()).toISOString().split('T')[0]}.json`; a.click();
-        URL.revokeObjectURL(a.href);
-      }
-      function loadFromJsonFile(event) {
-        const file = event.target.files[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = e => { try { const parsed = JSON.parse(e.target.result); pushUndo(); applyDataToForm(parsed); updateUI(); alert('JSON cargado.'); } catch (err) { alert('Error leyendo JSON.'); } };
-        reader.readAsText(file); event.target.value = '';
+      /* Crear watermark como dataURL */
+      function createWatermarkDataUrl(text, widthPx = 1200, heightPx = 1200, opacity = 0.12, fontSize = 72) {
+        const canvas = document.createElement('canvas');
+        canvas.width = widthPx; canvas.height = heightPx;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, widthPx, heightPx);
+        ctx.globalAlpha = opacity; ctx.fillStyle = '#666666';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = `bold ${fontSize}px Inter, Arial, sans-serif`;
+        ctx.translate(widthPx / 2, heightPx / 2);
+        ctx.rotate(-0.6);
+        ctx.fillText(text, 0, 0);
+        return canvas.toDataURL('image/png');
       }
 
-      /* --- Cálculos y render --- */
-      function calculateFinancials() {
-        const v = {}; inputIds.forEach(id => v[id] = getNumberValue(id));
-        const utilidadBruta = v.ingresos_ventas - v.costo_ventas;
-        const gastosOperativos = v.gastos_sueldos + v.gastos_renta + v.gastos_servicios + v.gastos_publicidad;
-        const utilidadOperativa = utilidadBruta - gastosOperativos;
-        const utilidadAntesImpuestos = utilidadOperativa - v.gastos_financieros;
-        const utilidadNeta = utilidadAntesImpuestos - v.impuestos_isr;
+      /* ----- Cálculos centrales (ampliados) ----- */
+      function calculateAll() {
+        const caja = getNum('caja'), bancos = getNum('bancos'), cxp = getNum('cxp'), inventarios = getNum('inventarios'), anticipos = getNum('anticipos'), intangibles = getNum('intangibles');
+        const terrenos = getNum('terrenos'), maquinaria = getNum('maquinaria'), vehiculos = getNum('vehiculos'), depreciacion_acum = getNum('depreciacion_acum');
+        const total_act_corr = caja + bancos + cxp + inventarios + anticipos;
+        const prop_plant_bruto = terrenos + maquinaria + vehiculos;
+        const neto_prop_plant = prop_plant_bruto - depreciacion_acum;
+        const total_act_no_corr = neto_prop_plant + intangibles;
+        const total_activos = total_act_corr + total_act_no_corr;
 
-        const totalActivoCirculante = v.caja_bancos + v.inversiones_temp + v.clientes + v.inventarios;
-        const totalActivoFijoBruto = v.terrenos_edificios + v.maquinaria_equipo + v.equipo_transporte;
-        const totalActivoFijoNeto = totalActivoFijoBruto - v.depreciacion;
-        const totalActivos = totalActivoCirculante + totalActivoFijoNeto;
+        const proveedores = getNum('proveedores'), prestamos_cp = getNum('prestamos_cp'), impuestos_pagar = getNum('impuestos_pagar'), otras_corrientes = getNum('otras_corrientes'), deuda_lp = getNum('deuda_lp'), provisiones_lp = getNum('provisiones_lp');
+        const total_pasivo_corr = proveedores + prestamos_cp + impuestos_pagar + otras_corrientes;
+        const total_pasivo_lp = deuda_lp + provisiones_lp;
+        const total_pasivos = total_pasivo_corr + total_pasivo_lp;
 
-        const totalPasivoCirculante = v.proveedores + v.acreedores + v.prestamos_corto + v.impuestos_pagar;
-        const totalPasivoLargoPlazo = v.prestamos_largo;
-        const totalPasivos = totalPasivoCirculante + totalPasivoLargoPlazo;
+        const capital_social = getNum('capital_social'), reservas = getNum('reservas'), utilidades_retenidas = getNum('utilidades_retenidas');
 
-        const totalPatrimonio = v.capital_social + v.utilidades_retenidas + utilidadNeta;
-        const totalPasivoPatrimonio = totalPasivos + totalPatrimonio;
+        const ventas_net = getNum('ventas_net'), devoluciones = getNum('devoluciones'), costo_ventas = getNum('costo_ventas');
+        const neto_ventas = ventas_net - devoluciones;
+        const utilidad_bruta = neto_ventas - costo_ventas;
 
-        const balanceDiff = totalActivos - totalPasivoPatrimonio;
+        const g_sueldos = getNum('gasto_sueldos'), g_renta = getNum('gasto_renta'), g_mark = getNum('gasto_marketing'), g_depr = getNum('gasto_depreciacion'), g_inter = getNum('gasto_intereses');
+        const gastos_operativos = g_sueldos + g_renta + g_mark + g_depr;
+        const ebitda = utilidad_bruta - (g_sueldos + g_renta + g_mark);
+        const utilidad_operativa = utilidad_bruta - gastos_operativos;
+        const resultado_antes_impuestos = utilidad_operativa - g_inter;
+        const impuestos = getNum('impuestos_calc');
+        const utilidad_neta = resultado_antes_impuestos - impuestos;
 
-        const liquidezCorriente = totalPasivoCirculante > 0 ? totalActivoCirculante / totalPasivoCirculante : 0;
-        const pruebaAcida = totalPasivoCirculante > 0 ? (totalActivoCirculante - v.inventarios) / totalPasivoCirculante : 0;
-        const endeudamiento = totalActivos > 0 ? totalPasivos / totalActivos : 0;
-        const roa = totalActivos > 0 ? utilidadNeta / totalActivos : 0;
-        const roe = totalPatrimonio > 0 ? utilidadNeta / totalPatrimonio : 0;
-        const margenNeto = v.ingresos_ventas > 0 ? utilidadNeta / v.ingresos_ventas : 0;
+        const delta_cxc = getNum('delta_cxc'), delta_inv = getNum('delta_inventarios'), delta_cxp = getNum('delta_cxp');
+        const capex = getNum('capex'), venta_activo = getNum('venta_activo');
+        const deuda_emitida = getNum('deuda_emitida'), deuda_pagada = getNum('deuda_pagada'), dividendos_pag = getNum('dividendos_pag');
 
-        return { v, utilidadBruta, gastosOperativos, utilidadOperativa, utilidadAntesImpuestos, utilidadNeta, totalActivoCirculante, totalActivoFijoNeto, totalActivos, totalPasivoCirculante, totalPasivoLargoPlazo, totalPasivos, totalPatrimonio, totalPasivoPatrimonio, balanceDiff, liquidezCorriente, pruebaAcida, endeudamiento, roa, roe, margenNeto };
+        // Actividades de operación (método indirecto)
+        const flujo_operativo = utilidad_neta + g_depr + g_inter - delta_cxc - delta_inv + delta_cxp;
+        const flujo_inversion = -capex + venta_activo;
+        const flujo_financiamiento = deuda_emitida - deuda_pagada - dividendos_pag;
+        const cambio_efectivo = flujo_operativo + flujo_inversion + flujo_financiamiento;
+
+        const util_finales = utilidades_retenidas + utilidad_neta - dividendos_pag;
+        const patrimonio_total = capital_social + reservas + util_finales;
+
+        const liquidez_corriente = total_pasivo_corr > 0 ? total_act_corr / total_pasivo_corr : null;
+        const endeudamiento = total_activos > 0 ? total_pasivos / total_activos : null;
+        const margen_neto = neto_ventas > 0 ? utilidad_neta / neto_ventas : null;
+        const roa = total_activos > 0 ? utilidad_neta / total_activos : null;
+        const roe = patrimonio_total > 0 ? utilidad_neta / patrimonio_total : null;
+        const ebitda_margin = neto_ventas > 0 ? ebitda / neto_ventas : null;
+
+        return {
+          // inputs
+          caja, bancos, cxp, inventarios, anticipos, intangibles, terrenos, maquinaria, vehiculos, depreciacion_acum,
+          proveedores, prestamos_cp, impuestos_pagar, otras_corrientes, deuda_lp, provisiones_lp,
+          capital_social, reservas, utilidades_retenidas,
+          ventas_net, devoluciones, costo_ventas, neto_ventas, utilidad_bruta,
+          g_sueldos, g_renta, g_mark, g_depr, g_inter, gastos_operativos, ebitda, utilidad_operativa, resultado_antes_impuestos, impuestos, utilidad_neta,
+          delta_cxc, delta_inv, delta_cxp, capex, venta_activo, deuda_emitida, deuda_pagada, dividendos_pag,
+
+          // computed totals
+          total_act_corr, prop_plant_bruto, neto_prop_plant, total_act_no_corr, total_activos,
+          total_pasivo_corr, total_pasivo_lp, total_pasivos,
+          flujo_operativo, flujo_inversion, flujo_financiamiento, cambio_efectivo,
+          util_finales, patrimonio_total,
+          liquidez_corriente, endeudamiento, margen_neto, roa, roe, ebitda_margin
+        };
       }
 
+      /* ----- Renderers accesibles (balance, resultados, flujos, patrimonio) ----- */
       function getReportHeader() {
-        const companyName = $('companyName').value || 'Agronare S.A. de C.V.';
-        const reportDateInput = $('reportDate').value;
-        const reportDate = reportDateInput ? new Date(reportDateInput + 'T12:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Fecha no especificada';
-        return { companyName, reportDate };
+        return {
+          companyName: $('companyName') ? $('companyName').value || 'Agronare S.A. de C.V.' : 'Agronare',
+          reportDate: $('reportDate') && $('reportDate').value ? new Date($('reportDate').value + 'T12:00:00').toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('es-MX')
+        };
       }
 
-      function renderBalanceSheet(data) {
-        const { companyName, reportDate } = getReportHeader();
-        const { v, totalActivoCirculante, totalActivoFijoNeto, totalActivos, totalPasivoCirculante, totalPasivoLargoPlazo, totalPasivos, totalPatrimonio, totalPasivoPatrimonio, balanceDiff } = data;
-        const balanceStatus = Math.abs(balanceDiff) < 0.01 ? `<span class="pos bg-green-100 px-2 py-1 rounded-full text-sm">Balance correcto</span>` : `<span class="neg bg-red-100 px-2 py-1 rounded-full text-sm">Desbalance: ${formatMoney(balanceDiff)}</span>`;
+      function renderBalance(data) {
+        const h = getReportHeader();
+        const verticalOn = $('verticalAnalysisToggle') && $('verticalAnalysisToggle').checked;
+        const showDetails = $('showDetailsToggle') && $('showDetailsToggle').checked;
+        const totalActivos = data.total_activos !== 0 ? data.total_activos : 1;
+        const pct = (val) => verticalOn ? `${fmtNum((val / totalActivos) * 100)}%` : null;
+
+        const buildRow = (l, v, isTotal = false, isSub = false) => {
+          const p = pct(v);
+          const pCell = verticalOn ? `<td class="text-right small text-slate-500">${p || ''}</td>` : '';
+          const subClass = isSub ? 'pl-4' : '';
+          return `<tr class="${isTotal ? 'total-cell' : ''}"><td class="${subClass}">${l}</td><td class="text-right">${formatMoney(v)}</td>${pCell}</tr>`;
+        };
+        const headerCols = verticalOn ? '<th class="text-right w-28">% Total</th>' : '';
+
+        // Activos
+        const activosRows = [
+          ['Caja y Bancos', data.caja + data.bancos, false],
+          ...(showDetails ? [[' - Caja', data.caja, true], [' - Bancos', data.bancos, true]] : []),
+          ['Cuentas por Cobrar (neto)', data.cxp, false],
+          ['Inventarios', data.inventarios, false],
+          ['Anticipos y Otros Corrientes', data.anticipos, false],
+          ['Total Activos Corrientes', data.total_act_corr, true]
+        ];
+
+        // No corrientes
+        const nonCurrentRows = [
+          ['Propiedad Planta y Equipo (bruto)', data.prop_plant_bruto, false],
+          ...(showDetails ? [[' - Terrenos', data.terrenos, true], [' - Maquinaria', data.maquinaria, true], [' - Vehículos', data.vehiculos, true]] : []),
+          ['(-) Depreciación Acumulada', -data.depreciacion_acum, false],
+          ['Neto Propiedad Planta y Equipo', data.neto_prop_plant, true],
+          ['Intangibles (neto)', data.intangibles, false],
+          ['Total Activos No Corrientes', data.total_act_no_corr, true]
+        ];
+
+        // Pasivos y patrimonio
+        const pasivosCorrRows = [
+          ['Proveedores', data.proveedores, false],
+          ['Préstamos Corto Plazo', data.prestamos_cp, false],
+          ['Impuestos por pagar', data.impuestos_pagar, false],
+          ['Otras obligaciones corrientes', data.otras_corrientes, false],
+          ['Total Pasivos Corrientes', data.total_pasivo_corr, true]
+        ];
+
+        const pasivosNoCorrRows = [
+          ['Deuda Largo Plazo', data.deuda_lp, false],
+          ['Provisiones y otros no corrientes', data.provisiones_lp, false],
+          ['Total Pasivos No Corrientes', data.total_pasivo_lp, true]
+        ];
+
+        const patrimonioRows = [
+          ['Capital Social', data.capital_social, false],
+          ['Reservas', data.reservas, false],
+          ['Utilidades Retenidas (final)', data.util_finales, false],
+          ['PATRIMONIO TOTAL', data.patrimonio_total, true]
+        ];
+
+        // Build HTML
+        const activosTable = `
+            <h3 id="activos-sep" class="font-bold mb-2 accent2">ACTIVOS</h3>
+            <table class="w-full text-sm" role="table" aria-label="Tabla de activos">
+              <thead><tr class="border-b"><th class="text-left">Activo</th><th class="text-right">Valor</th>${headerCols}</tr></thead>
+              <tbody>
+                ${activosRows.map(r => buildRow(r[0], r[1], r[2])).join('')}
+              </tbody>
+              <thead><tr><th class="pt-4 text-left">Activo No Corriente</th><th></th>${verticalOn ? '<th></th>' : ''}</tr></thead>
+              <tbody>
+                ${nonCurrentRows.map(r => buildRow(r[0], r[1], r[2])).join('')}
+              </tbody>
+              <tfoot>
+                ${buildRow('TOTAL ACTIVOS', data.total_activos, true)}
+              </tfoot>
+            </table>`;
+
+        const pasivosTable = `
+            <h3 id="pasivos-sep" class="font-bold mb-2 accent">PASIVOS Y PATRIMONIO</h3>
+            <table class="w-full text-sm" role="table" aria-label="Tabla de pasivos y patrimonio">
+                <thead><tr class="border-b"><th class="text-left">Pasivo</th><th class="text-right">Valor</th>${headerCols}</tr></thead>
+                <tbody>
+                    ${pasivosCorrRows.map(r => buildRow(r[0], r[1], r[2])).join('')}
+                </tbody>
+                <tbody>
+                    ${pasivosNoCorrRows.map(r => buildRow(r[0], r[1], r[2])).join('')}
+                </tbody>
+                <tfoot>
+                    ${buildRow('TOTAL PASIVOS', data.total_pasivos, true)}
+                </tfoot>
+                <thead><tr class="pt-4"><th class="text-left">Patrimonio</th><th></th>${verticalOn ? '<th></th>' : ''}</tr></thead>
+                <tbody>
+                    ${patrimonioRows.map(r => buildRow(r[0], r[1], r[2])).join('')}
+                </tbody>
+                <tfoot>
+                    ${buildRow('TOTAL PASIVO + PATRIMONIO', data.total_pasivos + data.patrimonio_total, true)}
+                </tfoot>
+            </table>`;
 
         const html = `
-      <div class="flex justify-between items-start mb-4">
-        <div>
-          <h2 class="text-2xl font-bold">Balance General</h2>
-          <p class="text-sm text-slate-500">${companyName} — Al ${reportDate}</p>
-        </div>
-        ${balanceStatus}
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-slate-50 p-4 rounded-lg border space-y-2">
-          <h3 class="font-bold mb-2 text-blue-700">Activos</h3>
-          <table class="w-full text-sm">
-            <tr class="font-semibold bg-gray-200"><td colspan="2" class="p-1">Activo Circulante</td></tr>
-            <tr><td class="p-1">Caja y Bancos</td><td class="text-right p-1">${formatMoney(v.caja_bancos)}</td></tr>
-            <tr><td class="p-1">Inversiones Temporales</td><td class="text-right p-1">${formatMoney(v.inversiones_temp)}</td></tr>
-            <tr><td class="p-1">Clientes</td><td class="text-right p-1">${formatMoney(v.clientes)}</td></tr>
-            <tr><td class="p-1">Inventarios</td><td class="text-right p-1">${formatMoney(v.inventarios)}</td></tr>
-            <tr class="font-bold border-t"><td class="p-1">Total Activo Circulante</td><td class="text-right p-1">${formatMoney(totalActivoCirculante)}</td></tr>
-            <tr class="font-semibold bg-gray-200 mt-2"><td colspan="2" class="p-1">Activo Fijo Neto</td></tr>
-            <tr><td class="p-1">Total Activo Fijo Neto</td><td class="text-right p-1">${formatMoney(totalActivoFijoNeto)}</td></tr>
-          </table>
-          <div class="mt-2 p-2 bg-blue-600 text-white font-bold rounded-lg flex justify-between"><span>TOTAL ACTIVOS</span><span>${formatMoney(totalActivos)}</span></div>
-        </div>
-        <div class="bg-slate-50 p-4 rounded-lg border space-y-2">
-           <h3 class="font-bold mb-2 text-orange-700">Pasivos y Patrimonio</h3>
-           <table class="w-full text-sm">
-            <tr class="font-semibold bg-gray-200"><td colspan="2" class="p-1">Pasivo Circulante</td></tr>
-            <tr><td class="p-1">Proveedores</td><td class="text-right p-1">${formatMoney(v.proveedores)}</td></tr>
-            <tr><td class="p-1">Acreedores Diversos</td><td class="text-right p-1">${formatMoney(v.acreedores)}</td></tr>
-            <tr><td class="p-1">Préstamos Corto Plazo</td><td class="text-right p-1">${formatMoney(v.prestamos_corto)}</td></tr>
-            <tr><td class="p-1">Impuestos por Pagar</td><td class="text-right p-1">${formatMoney(v.impuestos_pagar)}</td></tr>
-            <tr class="font-bold border-t"><td class="p-1">Total Pasivo Circulante</td><td class="text-right p-1">${formatMoney(totalPasivoCirculante)}</td></tr>
-            <tr class="font-semibold bg-gray-200 mt-2"><td colspan="2" class="p-1">Pasivo a Largo Plazo</td></tr>
-            <tr class="font-bold border-t"><td class="p-1">Total Pasivo Largo Plazo</td><td class="text-right p-1">${formatMoney(totalPasivoLargoPlazo)}</td></tr>
-            <tr class="font-bold border-t-2 border-gray-400"><td class="p-1">TOTAL PASIVOS</td><td class="text-right p-1">${formatMoney(totalPasivos)}</td></tr>
-            <tr class="font-semibold bg-gray-200 mt-2"><td colspan="2" class="p-1">Patrimonio</td></tr>
-            <tr class="font-bold border-t"><td class="p-1">Total Patrimonio</td><td class="text-right p-1">${formatMoney(totalPatrimonio)}</td></tr>
-           </table>
-           <div class="mt-2 p-2 bg-orange-600 text-white font-bold rounded-lg flex justify-between"><span>TOTAL PASIVO + PATRIMONIO</span><span>${formatMoney(totalPasivoPatrimonio)}</span></div>
-        </div>
-      </div>
-    `;
+          <div class="mb-4">
+            <h2 class="text-2xl font-bold">Balance General</h2>
+            <p class="small">${h.companyName} — Al ${h.reportDate}</p>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="card p-4" role="region" aria-labelledby="activos-sep">${activosTable}</div>
+            <div class="card p-4" role="region" aria-labelledby="pasivos-sep">${pasivosTable}</div>
+          </div>`;
         $('content-balance').innerHTML = html;
       }
 
-      function renderIncomeStatement(data) {
-        const { companyName, reportDate } = getReportHeader();
-        const { v, utilidadBruta, gastosOperativos, utilidadOperativa, utilidadAntesImpuestos, utilidadNeta } = data;
+      function renderResultados(data) {
+        const h = getReportHeader();
+        const verticalOn = $('verticalAnalysisToggle') && $('verticalAnalysisToggle').checked;
+        const showDetails = $('showDetailsToggle') && $('showDetailsToggle').checked;
+        const totalVentas = data.neto_ventas !== 0 ? data.neto_ventas : 1;
+        const pct = (val) => verticalOn ? `${fmtNum((val / totalVentas) * 100)}%` : null;
+
+        const buildRow = (l, v, isTotal = false, isSub = false) => {
+          const p = pct(v);
+          const pCell = verticalOn ? `<td class="text-right small text-slate-500">${p || ''}</td>` : '';
+          const subClass = isSub ? 'pl-4' : '';
+          return `<tr class="${isTotal ? 'total-cell' : ''}"><td class="${subClass}">${l}</td><td class="text-right">${formatMoney(v)}</td>${pCell}</tr>`;
+        };
+
+        const headerCols = verticalOn ? `<th class="text-right w-28">% Ventas</th>` : '';
+
+        // Build rows with more granularity
+        const rows = [];
+        rows.push(['Ventas Brutas', data.ventas_net]);
+        rows.push(['(-) Devoluciones', -data.devoluciones]);
+        rows.push(['Ventas Netas', data.neto_ventas, true]);
+        rows.push(['(-) Costo de Ventas', -data.costo_ventas]);
+        rows.push(['Utilidad Bruta', data.utilidad_bruta, true]);
+
+        rows.push(['Gastos Operativos', '', false]);
+        if (showDetails) {
+          rows.push([' - Sueldos', -data.g_sueldos, false, true]);
+          rows.push([' - Renta', -data.g_renta, false, true]);
+          rows.push([' - Marketing', -data.g_mark, false, true]);
+          rows.push([' - Depreciación', -data.g_depr, false, true]);
+        } else {
+          rows.push([' - Gastos Operativos (resumido)', -data.gastos_operativos, false, true]);
+        }
+        rows.push(['Total Gastos Operativos', -data.gastos_operativos, true]);
+
+        rows.push(['EBITDA', data.ebitda]);
+        rows.push(['Utilidad Operativa (EBIT)', data.utilidad_operativa, true]);
+        rows.push(['(-) Gastos Financieros', -data.g_inter]);
+        rows.push(['Resultado antes de Impuestos', data.resultado_antes_impuestos, true]);
+        rows.push(['(-) Impuestos', -data.impuestos]);
+        rows.push(['UTILIDAD NETA', data.utilidad_neta, true]);
+
         const html = `
-      <div class="mb-4">
-        <h2 class="text-2xl font-bold">Estado de Resultados</h2>
-        <p class="text-sm text-slate-500">${companyName} — Periodo terminado ${reportDate}</p>
-      </div>
-      <div class="max-w-3xl mx-auto bg-slate-50 p-4 rounded-lg border">
-        <table class="w-full text-sm">
-          <tr><td class="p-1">Ingresos por Ventas</td><td class="text-right p-1">${formatMoney(v.ingresos_ventas)}</td></tr>
-          <tr><td class="p-1">(-) Costo de Ventas</td><td class="text-right p-1">${formatMoney(v.costo_ventas * -1)}</td></tr>
-          <tr class="font-bold border-t"><td class="p-1">Utilidad Bruta</td><td class="text-right p-1">${formatMoney(utilidadBruta)}</td></tr>
-          <tr class="pt-2"><td class="p-1 font-semibold" colspan="2">Gastos Operativos</td></tr>
-          <tr><td class="pl-4 p-1">Sueldos y Salarios</td><td class="text-right p-1">${formatMoney(v.gastos_sueldos * -1)}</td></tr>
-          <tr><td class="pl-4 p-1">Renta y Alquileres</td><td class="text-right p-1">${formatMoney(v.gastos_renta * -1)}</td></tr>
-          <tr><td class="pl-4 p-1">Servicios Públicos</td><td class="text-right p-1">${formatMoney(v.gastos_servicios * -1)}</td></tr>
-          <tr><td class="pl-4 p-1">Publicidad y Marketing</td><td class="text-right p-1">${formatMoney(v.gastos_publicidad * -1)}</td></tr>
-          <tr class="font-bold border-t"><td class="p-1">Total Gastos Operativos</td><td class="text-right p-1">${formatMoney(gastosOperativos * -1)}</td></tr>
-          <tr class="font-bold border-t"><td class="p-1">Utilidad Operativa (EBIT)</td><td class="text-right p-1">${formatMoney(utilidadOperativa)}</td></tr>
-          <tr><td class="p-1">(-) Gastos Financieros</td><td class="text-right p-1">${formatMoney(v.gastos_financieros * -1)}</td></tr>
-          <tr class="font-bold border-t"><td class="p-1">Utilidad antes de Impuestos</td><td class="text-right p-1">${formatMoney(utilidadAntesImpuestos)}</td></tr>
-          <tr><td class="p-1">(-) Impuestos (ISR)</td><td class="text-right p-1">${formatMoney(v.impuestos_isr * -1)}</td></tr>
-        </table>
-        <div class="mt-2 p-2 bg-teal-600 text-white font-bold rounded-lg flex justify-between text-lg"><span>UTILIDAD NETA</span><span>${formatMoney(utilidadNeta)}</span></div>
-      </div>
-    `;
+            <div class="mb-4"><h2 class="text-2xl font-bold">Estado de Resultados</h2><p class="small">${h.companyName} — Periodo: ${h.reportDate}</p></div>
+            <div class="card p-4" role="region" aria-labelledby="er-tabla">
+            <table class="w-full text-sm" id="er-tabla" role="table" aria-label="Estado de resultados detallado">
+                <thead><tr class="border-b"><th class="text-left">Concepto</th><th class="text-right">Valor</th>${headerCols}</tr></thead>
+                <tbody>
+                    ${rows.map(r => buildRow(r[0], r[1] || 0, r[2] || false, r[3] || false)).join('')}
+                </tbody>
+            </table>
+            <div class="small mt-3">Margen EBITDA: ${data.ebitda_margin ? (fmtNum(data.ebitda_margin * 100) + '%') : 'N/A'}</div>
+            </div>`;
         $('content-resultados').innerHTML = html;
       }
 
-      function renderRatios(data) {
-        const { companyName, reportDate } = getReportHeader();
-        const { liquidezCorriente, pruebaAcida, endeudamiento, roa, roe, margenNeto } = data;
-        const getRatioRow = (name, value, interpretation, isPercentage = false) => {
-          const valStr = isPercentage ? `${formatNumber(value * 100)}%` : formatNumber(value);
-          return `<div class="p-3 border-b last:border-b-0"><div class="flex justify-between items-center"><p class="font-semibold">${name}</p><p class="text-lg font-bold">${valStr}</p></div><p class="text-xs text-slate-500 mt-1">${interpretation}</p></div>`;
-        };
+      function renderFlujos(data) {
+        const h = getReportHeader();
+        const showDetails = $('showDetailsToggle') && $('showDetailsToggle').checked;
+
+        const opRows = [
+          ['Utilidad Neta', data.utilidad_neta],
+          ['(+) Ajustes: Depreciación', data.g_depr || 0],
+          ['(+) Ajustes: Gastos financieros', data.g_inter || 0],
+          ...(showDetails ? [['(-) Δ Cuentas por Cobrar', -data.delta_cxc], ['(-) Δ Inventarios', -data.delta_inv], ['(+) Δ Cuentas por Pagar', data.delta_cxp]] : [['(Cambios en capital de trabajo) (ver detalles)', -(data.delta_cxc + data.delta_inv - data.delta_cxp)]]),
+          ['Flujo neto de actividades de operación', data.flujo_operativo]
+        ];
+
+        const invRows = [
+          ['(-) Compras de activo fijo (CAPEX)', -data.capex],
+          ['(+) Venta de activos', data.venta_activo],
+          ['Flujo de actividades de inversión', data.flujo_inversion]
+        ];
+
+        const finRows = [
+          ['(+) Nueva Deuda Emitida', data.deuda_emitida],
+          ['(-) Pago de Deuda', -data.deuda_pagada],
+          ['(-) Dividendos Pagados', -data.dividendos_pag],
+          ['Flujo de actividades de financiación', data.flujo_financiamiento]
+        ];
+
+        const buildRow = (l, v, isTotal = false) => `<tr class="${isTotal ? 'total-cell' : ''}"><td>${l}</td><td class="text-right">${formatMoney(v)}</td></tr>`;
+
         const html = `
-      <div class="mb-4"><h2 class="text-2xl font-bold">Ratios Financieros Clave</h2><p class="text-sm text-slate-500">${companyName} — Análisis al ${reportDate}</p></div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-slate-50 rounded-lg border">
-          <h3 class="font-bold p-3 text-indigo-700 border-b">Ratios de Liquidez</h3>
-          ${getRatioRow('Liquidez Corriente', liquidezCorriente, 'Capacidad para cubrir deudas a corto plazo.')}
-          ${getRatioRow('Prueba Ácida', pruebaAcida, 'Capacidad para cubrir deudas a corto plazo sin vender inventario.')}
-        </div>
-         <div class="bg-slate-50 rounded-lg border">
-          <h3 class="font-bold p-3 text-indigo-700">Ratio de Endeudamiento</h3>
-          ${getRatioRow('Nivel de Endeudamiento', endeudamiento, 'Porcentaje de activos financiados por deuda.', true)}
-        </div>
-        <div class="bg-slate-50 rounded-lg border md:col-span-2">
-          <h3 class="font-bold p-3 text-indigo-700 border-b">Ratios de Rentabilidad</h3>
-          ${getRatioRow('Margen de Utilidad Neta', margenNeto, 'Porcentaje de ganancia por cada peso de venta.', true)}
-          ${getRatioRow('Retorno sobre Activos (ROA)', roa, 'Eficiencia en el uso de activos para generar ganancias.', true)}
-          ${getRatioRow('Retorno sobre Patrimonio (ROE)', roe, 'Rentabilidad generada para los accionistas.', true)}
-        </div>
-      </div>
-    `;
-        $('content-ratios').innerHTML = html;
+        <div class="mb-4"><h2 class="text-2xl font-bold">Estado de Flujos de Efectivo</h2><p class="small">${h.companyName} — Periodo: ${h.reportDate}</p></div>
+        <div class="card p-4" role="region" aria-labelledby="flujos-tabla">
+          <table class="w-full text-sm" id="flujos-tabla" role="table" aria-label="Estado de flujos de efectivo">
+            <tbody>
+              <tr class="total-cell"><td>Flujo de Actividades de Operación</td><td class="text-right">${formatMoney(data.flujo_operativo)}</td></tr>
+              ${opRows.map(r => buildRow(r[0], r[1])).join('')}
+              <tr class="total-cell pt-4"><td class="pt-4">Flujo de Actividades de Inversión</td><td class="text-right">${formatMoney(data.flujo_inversion)}</td></tr>
+              ${invRows.map(r => buildRow(r[0], r[1])).join('')}
+              <tr class="total-cell pt-4"><td class="pt-4">Flujo de Actividades de Financiación</td><td class="text-right">${formatMoney(data.flujo_financiamiento)}</td></tr>
+              ${finRows.map(r => buildRow(r[0], r[1])).join('')}
+              <tr class="total-cell mt-4 border-t-2 border-black"><td class="pt-4">CAMBIO NETO EN EFECTIVO</td><td class="text-right">${formatMoney(data.cambio_efectivo)}</td></tr>
+            </tbody>
+          </table>
+        </div>`;
+        $('content-flujos').innerHTML = html;
       }
 
-      function updateSummaryCards(data) {
-        $('card-total-activos').innerHTML = formatMoney(data.totalActivos);
-        $('card-total-pasivos').innerHTML = formatMoney(data.totalPasivos);
-        $('card-total-patrimonio').innerHTML = formatMoney(data.totalPatrimonio);
-        $('card-utilidad-neta').innerHTML = formatMoney(data.utilidadNeta);
+      function renderPatrimonio(data) {
+        const h = getReportHeader();
+        const html = `
+        <div class="mb-4"><h2 class="text-2xl font-bold">Estado de Cambios en el Patrimonio Neto</h2><p class="small">${h.companyName} — Periodo: ${h.reportDate}</p></div>
+        <div class="card p-4" role="region" aria-labelledby="patrimonio-tabla">
+          <table class="w-full text-sm" id="patrimonio-tabla" role="table" aria-label="Estado de cambios en el patrimonio">
+            <tbody>
+              <tr><td>Utilidades Retenidas (inicio del periodo)</td><td class="text-right">${formatMoney(data.utilidades_retenidas)}</td></tr>
+              <tr><td>(+) Utilidad Neta del Periodo</td><td class="text-right">${formatMoney(data.utilidad_neta)}</td></tr>
+              <tr><td>(-) Dividendos Pagados</td><td class="text-right">${formatMoney(-data.dividendos_pag)}</td></tr>
+              <tr class="total-cell"><td>Utilidades Retenidas (final del periodo)</td><td class="text-right">${formatMoney(data.util_finales)}</td></tr>
+              <tr class="mt-4 border-t"><td class="pt-4">Capital Social</td><td class="text-right">${formatMoney(data.capital_social)}</td></tr>
+              <tr><td>Reservas</td><td class="text-right">${formatMoney(data.reservas)}</td></tr>
+              <tr class="total-cell mt-4 border-t-2 border-black"><td class="pt-4">PATRIMONIO TOTAL</td><td class="text-right">${formatMoney(data.patrimonio_total)}</td></tr>
+            </tbody>
+          </table>
+        </div>`;
+        $('content-patrimonio').innerHTML = html;
       }
 
-      /* --- CHARTS --- */
-      let charts = {};
-      function initCharts() {
-        Object.values(charts).forEach(c => c?.destroy?.());
-        Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
-        charts.balance = new Chart($('chart-balance').getContext('2d'), {
-          type: 'bar',
-          data: { labels: ['Comparativo'], datasets: [{ label: 'Total Activos', data: [], backgroundColor: '#3b82f6' }, { label: 'Pasivo+Patrimonio', data: [], backgroundColor: '#f97316' }] },
-          options: { maintainAspectRatio: false, responsive: true }
-        });
-        charts.resultados = new Chart($('chart-resultados').getContext('2d'), {
-          type: 'doughnut',
-          data: { labels: ['Utilidad Neta', 'Costo', 'Gastos Op', 'Gastos Fin', 'Impuestos'], datasets: [{ data: [], backgroundColor: ['#16a34a', '#f59e0b', '#ef4444', '#6366f1', '#64748b'] }] },
-          options: { maintainAspectRatio: false, responsive: true }
-        });
-        charts.activos = new Chart($('chart-activos').getContext('2d'), { type: 'pie', data: { labels: ['Act Circulante', 'Act Fijo Neto'], datasets: [{ data: [], backgroundColor: ['#3b82f6', '#0ea5e9'] }] }, options: { maintainAspectRatio: false } });
-        charts.paspat = new Chart($('chart-paspat').getContext('2d'), { type: 'pie', data: { labels: ['Pasivo CP', 'Pasivo LP', 'Patrimonio'], datasets: [{ data: [], backgroundColor: ['#f97316', '#ef4444', '#84cc16'] }] }, options: { maintainAspectRatio: false } });
-      }
+      /* ----- Gráficos y ratios ----- */
+      function renderRatiosAndCharts(data) {
+        if ($('ratio-liquidez')) $('ratio-liquidez').textContent = data.liquidez_corriente ? fmtNum(data.liquidez_corriente) : 'N/A';
+        if ($('ratio-endeudamiento')) $('ratio-endeudamiento').textContent = data.endeudamiento ? (fmtNum(data.endeudamiento * 100) + '%') : 'N/A';
+        if ($('ratio-margen')) $('ratio-margen').textContent = data.margen_neto ? (fmtNum(data.margen_neto * 100) + '%') : 'N/A';
+        if ($('ratio-roa')) $('ratio-roa').textContent = data.roa ? (fmtNum(data.roa * 100) + '%') : 'N/A';
+        if ($('ratio-roe')) $('ratio-roe').textContent = data.roe ? (fmtNum(data.roe * 100) + '%') : 'N/A';
 
-      function updateCharts(data) {
-        if (!charts.balance) return;
-        charts.balance.data.datasets[0].data = [data.totalActivos];
-        charts.balance.data.datasets[1].data = [data.totalPasivoPatrimonio];
-        charts.balance.update();
-
-        charts.resultados.data.datasets[0].data = [
-          Math.max(0, data.utilidadNeta),
-          Math.max(0, data.v.costo_ventas),
-          Math.max(0, data.gastosOperativos),
-          Math.max(0, data.v.gastos_financieros),
-          Math.max(0, data.v.impuestos_isr)
-        ];
-        charts.resultados.update();
-
-        charts.activos.data.datasets[0].data = [data.totalActivoCirculante, data.totalActivoFijoNeto];
-        charts.activos.update();
-
-        charts.paspat.data.datasets[0].data = [data.totalPasivoCirculante, data.totalPasivoLargoPlazo, data.totalPatrimonio];
-        charts.paspat.update();
-      }
-
-      function updateUI(saveSnapshot = true) {
-        const data = calculateFinancials();
-        renderBalanceSheet(data);
-        renderIncomeStatement(data);
-        renderRatios(data);
-        updateSummaryCards(data);
-        if ($('content-graficos') && !$('content-graficos').classList.contains('hidden')) {
-          if (!charts.balance) initCharts();
-          updateCharts(data);
-        }
-        if (saveSnapshot) pushUndo();
-        saveToLocal(false);
-      }
-
-      /* --- EXPORT PDF (usa logo desde img#companyLogoImg) --- */
-      async function exportPDF() {
-        const prevTab = document.querySelector('.tab-button.active')?.id?.replace('tab-', '') || 'datos';
-        ['balance', 'resultados', 'ratios'].forEach(id => $(`content-${id}`).classList.remove('hidden'));
-
-        const header = document.createElement('div');
-        const { companyName, reportDate } = getReportHeader();
-        const logoSrc = $('companyLogoImg')?.src || '';
-        header.innerHTML = `
-          <div style="padding:1rem; display:flex; align-items:center; gap:16px; border-bottom:1px solid #e5e7eb;">
-            <img src="${logoSrc}" style="height:64px; width:64px; border-radius:6px;" />
-            <div><h1 style="margin:0; font-size:20px; font-weight:bold;">${companyName}</h1><div style="color:#6b7280;">Reporte: ${(new Date()).toLocaleString()}</div><div style="color:#6b7280;">Fecha del reporte: ${reportDate}</div></div>
-          </div>`;
-        const appRoot = $('app-root'); appRoot.insertBefore(header, $('content-container'));
-        const opt = { margin: [10, 10, 10, 10], filename: `agronare_reporte_${(new Date()).toISOString().split('T')[0]}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-        try { await html2pdf().set(opt).from(appRoot).save(); }
-        catch (e) { console.error(e); alert('Error al generar PDF.'); }
-        finally { header.remove(); switchTab(prevTab); }
-      }
-
-      /* --- EXPORT XLSX: con ExcelJS para incluir logo embebido --- */
-      async function exportXLSXWithLogo() {
-        // Recoge datos y convierte logo a base64
-        const data = calculateFinancials();
-        const logoImg = document.getElementById('companyLogoImg');
-        let base64 = null;
         try {
-          const logoSrc = logoImg?.src || '';
-          // fetch y blob a base64 (evita CORS si la imagen es remota sin permisos)
-          const resp = await fetch(logoSrc, { mode: 'cors' });
-          const blob = await resp.blob();
-          base64 = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result.split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob); });
-        } catch (e) {
-          console.warn('No se pudo obtener logo como base64 (CORS?). El archivo XLSX se generará sin logo.', e);
-          base64 = null;
+          if (window.Chart) {
+            if (!chartBalance) {
+              chartBalance = new Chart($('chart-balance').getContext('2d'), {
+                type: 'bar',
+                data: {
+                  labels: ['Comparativo'], datasets: [
+                    { label: 'Total Activos', data: [data.total_activos], backgroundColor: '#3b82f6' },
+                    { label: 'Total Pasivos', data: [data.total_pasivos], backgroundColor: '#f97316' },
+                    { label: 'Patrimonio', data: [data.patrimonio_total], backgroundColor: '#16a34a' }
+                  ]
+                }, options: { maintainAspectRatio: false, responsive: true }
+              });
+            } else {
+              chartBalance.data.datasets[0].data = [data.total_activos];
+              chartBalance.data.datasets[1].data = [data.total_pasivos];
+              chartBalance.data.datasets[2].data = [data.patrimonio_total];
+              chartBalance.update();
+            }
+
+            if (!chartResult) {
+              chartResult = new Chart($('chart-result').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: ['Utilidad Neta', 'Costo', 'Gastos'], datasets: [{ data: [Math.max(0, data.utilidad_neta), Math.max(0, data.costo_ventas), Math.max(0, data.gastos_operativos)], backgroundColor: ['#16a34a', '#f59e0b', '#ef4444'] }] },
+                options: { maintainAspectRatio: false, responsive: true }
+              });
+            } else {
+              chartResult.data.datasets[0].data = [Math.max(0, data.utilidad_neta), Math.max(0, data.costo_ventas), Math.max(0, data.gastos_operativos)];
+              chartResult.update();
+            }
+          }
+        } catch (e) { console.error(e); }
+      }
+
+      /* ----- Persistencia y utilidades UI ----- */
+      function collectForm() {
+        const o = {};
+        inputIds.forEach(id => { o[id] = $(id) ? $(id).value || '' : ''; });
+        o.companyName = $('companyName') ? $('companyName').value : '';
+        o.reportDate = $('reportDate') ? $('reportDate').value : '';
+        o.currency = $('currencySelect') ? $('currencySelect').value : '';
+        o.reportNotes = $('reportNotes') ? $('reportNotes').value : '';
+        o.showDetails = $('showDetailsToggle') ? $('showDetailsToggle').checked : false;
+        o.verticalAnalysis = $('verticalAnalysisToggle') ? $('verticalAnalysisToggle').checked : false;
+        return o;
+      }
+      function applyForm(obj) {
+        if (!obj) return;
+        inputIds.forEach(id => { if ($(id) && typeof obj[id] !== 'undefined') $(id).value = obj[id]; });
+        if ($('companyName')) $('companyName').value = obj.companyName || '';
+        if ($('reportDate')) $('reportDate').value = obj.reportDate || '';
+        if ($('currencySelect')) $('currencySelect').value = obj.currency || 'MXN';
+        if ($('reportNotes')) $('reportNotes').value = obj.reportNotes || '';
+        if ($('showDetailsToggle')) $('showDetailsToggle').checked = !!obj.showDetails;
+        if ($('verticalAnalysisToggle')) $('verticalAnalysisToggle').checked = !!obj.verticalAnalysis;
+      }
+      function showStatus(msg, polite = true) { const s = $('app-status'); if (s) { s.textContent = msg; s.classList.remove('sr-only'); if (polite) s.setAttribute('aria-live', 'polite'); } }
+      function hideStatus() { const s = $('app-status'); if (s) { s.textContent = ''; s.classList.add('sr-only'); } }
+
+      function saveToLocal(show = true) { try { localStorage.setItem(LS_KEY, JSON.stringify(collectForm())); if (show) { showStatus('Datos guardados en el navegador.'); setTimeout(hideStatus, 1800); } } catch (e) { console.error(e); showStatus('Error guardando localmente.'); } }
+      function loadFromLocal() { const raw = localStorage.getItem(LS_KEY); if (!raw) { showStatus('No hay datos guardados.'); setTimeout(hideStatus, 2000); return; } applyForm(JSON.parse(raw)); updateAll(false); showStatus('Datos recuperados desde el navegador.'); setTimeout(hideStatus, 1800); }
+
+      function showConfirmModal(message, onConfirm) {
+        const modal = $('confirm-modal');
+        $('modal-message').textContent = message;
+
+        const confirmHandler = () => {
+          onConfirm();
+          modal.classList.add('hidden');
+        };
+        const cancelHandler = () => modal.classList.add('hidden');
+
+        const confirmBtn = $('modal-confirm').cloneNode(true);
+        $('modal-confirm').parentNode.replaceChild(confirmBtn, $('modal-confirm'));
+        confirmBtn.addEventListener('click', confirmHandler);
+
+        const cancelBtn = $('modal-cancel').cloneNode(true);
+        $('modal-cancel').parentNode.replaceChild(cancelBtn, $('modal-cancel'));
+        cancelBtn.addEventListener('click', cancelHandler);
+
+        modal.classList.remove('hidden');
+        confirmBtn.focus();
+      }
+
+      function clearLocal() {
+        showConfirmModal('¿Está seguro de que desea borrar todos los datos guardados?', () => {
+          localStorage.removeItem(LS_KEY); showStatus('Datos eliminados.'); setTimeout(hideStatus, 1600);
+        });
+      }
+      function resetForm() {
+        showConfirmModal('¿Está seguro de que desea reiniciar todos los campos?', () => {
+          inputIds.forEach(id => { if ($(id)) $(id).value = ''; }); if ($('companyName')) $('companyName').value = 'Agronare S.A. de C.V.'; if ($('reportDate')) $('reportDate').valueAsDate = new Date(); updateAll(); showStatus('Formulario reiniciado.'); setTimeout(hideStatus, 1400);
+        });
+      }
+
+      function saveJsonFile() { const data = collectForm(); const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `agronare_datos_${(new Date()).toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(a.href); showStatus('Archivo JSON descargado.'); setTimeout(hideStatus, 1600); }
+      function loadJsonFile(e) { const f = e.target.files[0]; if (!f) return; const reader = new FileReader(); reader.onload = ev => { try { const parsed = JSON.parse(ev.target.result); applyForm(parsed); updateAll(); showStatus('Archivo JSON cargado.'); setTimeout(hideStatus, 1600); } catch (err) { showStatus('Error leyendo JSON.'); console.error(err); } }; reader.readAsText(f); e.target.value = ''; }
+
+      const showLoader = () => $('loader').classList.remove('hidden');
+      const hideLoader = () => $('loader').classList.add('hidden');
+
+      /* ----- Theme handling (light / dark) ----- */
+      function setTheme(theme) {
+        if (theme === 'dark') {
+          document.body.classList.add('dark');
+          if ($('btn-theme-toggle')) {
+            $('btn-theme-toggle').setAttribute('aria-checked', 'true');
+            $('theme-icon').textContent = '☀️';
+            $('theme-label').textContent = 'Claro';
+          }
+        } else {
+          document.body.classList.remove('dark');
+          if ($('btn-theme-toggle')) {
+            $('btn-theme-toggle').setAttribute('aria-checked', 'false');
+            $('theme-icon').textContent = '🌙';
+            $('theme-label').textContent = 'Oscuro';
+          }
         }
+        localStorage.setItem(THEME_KEY, theme);
+      }
 
-        // Crear workbook con ExcelJS
-        const workbook = new ExcelJS.Workbook();
-        workbook.creator = 'Agronare';
-        workbook.created = new Date();
+      if ($('btn-theme-toggle')) {
+        $('btn-theme-toggle').addEventListener('click', () => {
+          const cur = localStorage.getItem(THEME_KEY) || 'light';
+          setTheme(cur === 'dark' ? 'light' : 'dark');
+        });
+      }
 
-        // Hoja Portada
-        const cover = workbook.addWorksheet('Portada');
-        cover.columns = [{ width: 40 }, { width: 30 }];
-        cover.getCell('A2').value = $('companyName').value || 'Agronare S.A. de C.V.';
-        cover.getCell('A3').value = `Reporte generado: ${(new Date()).toLocaleString()}`;
-        cover.getCell('A4').value = `Fecha del reporte: ${getReportHeader().reportDate}`;
-
-        if (base64) {
-          // Agregar imagen embebida: ExcelJS en navegador requiere base64 (sin prefijo) y extension.
-          const imageId = workbook.addImage({ base64: base64, extension: 'png' });
-          // Insertar en la hoja: celdas A1:B4 (ajusta según tamaño)
-          cover.addImage(imageId, { tl: { col: 2, row: 0 }, br: { col: 4, row: 4 } });
-        }
-
-        // Balance
-        const balanceSheet = workbook.addWorksheet('Balance General');
-        const rowsBalance = [
-          ['Balance General', $('companyName').value || '', `Al ${getReportHeader().reportDate}`],
-          [],
-          ['ACTIVOS'],
-          ['Activo Circulante'],
-          ['Caja y Bancos', data.v.caja_bancos],
-          ['Inversiones Temporales', data.v.inversiones_temp],
-          ['Clientes', data.v.clientes],
-          ['Inventario', data.v.inventarios],
-          ['Total Activo Circulante', data.totalActivoCirculante],
-          [],
-          ['Activo Fijo'],
-          ['Terrenos y Edificios', data.v.terrenos_edificios],
-          ['Maquinaria y Equipo', data.v.maquinaria_equipo],
-          ['Equipo de Transporte', data.v.equipo_transporte],
-          ['(-) Depreciación Acum.', data.v.depreciacion * -1],
-          ['Total Activo Fijo Neto', data.totalActivoFijoNeto],
-          [],
-          ['TOTAL ACTIVOS', data.totalActivos],
-          [],
-          ['PASIVOS Y PATRIMONIO'],
-          ['Pasivo Circulante'],
-          ['Proveedores', data.v.proveedores],
-          ['Acreedores Diversos', data.v.acreedores],
-          ['Préstamos Corto Plazo', data.v.prestamos_corto],
-          ['Impuestos por Pagar', data.v.impuestos_pagar],
-          ['Total Pasivo Circulante', data.totalPasivoCirculante],
-          [],
-          ['Pasivo Largo Plazo'],
-          ['Préstamos Largo Plazo', data.v.prestamos_largo],
-          ['Total Pasivo Largo Plazo', data.totalPasivoLargoPlazo],
-          [],
-          ['TOTAL PASIVOS', data.totalPasivos],
-          [],
-          ['Patrimonio'],
-          ['Capital Social', data.v.capital_social],
-          ['Utilidades Retenidas', data.v.utilidades_retenidas],
-          ['Utilidad del Ejercicio', data.utilidadNeta],
-          ['Total Patrimonio', data.totalPatrimonio],
-          [],
-          ['TOTAL PASIVO + PATRIMONIO', data.totalPasivoPatrimonio]
-        ];
-        rowsBalance.forEach(r => balanceSheet.addRow(r));
-
-        // Estado de Resultados
-        const incomeSheet = workbook.addWorksheet('Estado de Resultados');
-        const rowsIncome = [
-          ['Estado de Resultados', $('companyName').value || '', `Periodo terminado ${getReportHeader().reportDate}`],
-          [],
-          ['Ingresos por Ventas', data.v.ingresos_ventas],
-          ['(-) Costo de Ventas', data.v.costo_ventas * -1],
-          ['Utilidad Bruta', data.utilidadBruta],
-          [],
-          ['Gastos Operativos'],
-          ['Sueldos y Salarios', data.v.gastos_sueldos * -1],
-          ['Renta y Alquileres', data.v.gastos_renta * -1],
-          ['Servicios Públicos', data.v.gastos_servicios * -1],
-          ['Publicidad y Marketing', data.v.gastos_publicidad * -1],
-          ['Total Gastos Operativos', data.gastosOperativos * -1],
-          ['Utilidad Operativa (EBIT)', data.utilidadOperativa],
-          [],
-          ['(-) Gastos Financieros', data.v.gastos_financieros * -1],
-          ['Utilidad antes de Impuestos', data.utilidadAntesImpuestos],
-          ['(-) Impuestos (ISR)', data.v.impuestos_isr * -1],
-          ['UTILIDAD NETA', data.utilidadNeta]
-        ];
-        rowsIncome.forEach(r => incomeSheet.addRow(r));
-
-        // Ratios
-        const ratiosSheet = workbook.addWorksheet('Ratios');
-        ratiosSheet.addRow(['Ratios Financieros', $('companyName').value || '', `Al ${getReportHeader().reportDate}`]);
-        ratiosSheet.addRow([]);
-        ratiosSheet.addRow(['Ratio', 'Valor', 'Interpretación']);
-        ratiosSheet.addRow(['Liquidez Corriente', formatNumber(data.liquidezCorriente), 'Capacidad para cubrir deudas a corto plazo.']);
-        ratiosSheet.addRow(['Prueba Ácida', formatNumber(data.pruebaAcida), 'Capacidad para cubrir deudas a corto plazo sin vender inventario.']);
-        ratiosSheet.addRow(['Nivel de Endeudamiento', `${formatNumber(data.endeudamiento * 100)}%`, 'Porcentaje de activos financiados por deuda.']);
-        ratiosSheet.addRow(['Margen Neto', `${formatNumber(data.margenNeto * 100)}%`, '% de ganancia por cada peso de venta.']);
-        ratiosSheet.addRow(['ROA', `${formatNumber(data.roa * 100)}%`, 'Retorno sobre activos.']);
-        ratiosSheet.addRow(['ROE', `${formatNumber(data.roe * 100)}%`, 'Retorno sobre patrimonio.']);
-
-        // Generar archivo (browser)
+      /* ----- Export PDF (no inline styles; use CSS classes) ----- */
+      async function exportPDFWithOptions() {
+        showLoader();
         try {
-          const buf = await workbook.xlsx.writeBuffer();
-          saveAs(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), `agronare_analisis_${(new Date()).toISOString().split('T')[0]}.xlsx`);
-          alert('XLSX generado con éxito. (Si no incluyó logo, puede ser por CORS si la imagen viene de otro dominio)');
+          const size = $('pdfSize').value || 'a4';
+          const orientation = $('pdfOrientation').value || 'portrait';
+          const scale = parseFloat($('pdfScale').value) || 2;
+          const includeHeaderLogo = $('pdfHeaderLogo').checked;
+          const watermarkOn = $('pdfWatermarkToggle').checked;
+          const watermarkText = $('pdfWatermarkText').value || '';
+          const watermarkOpacity = parseFloat($('pdfWatermarkOpacity').value) || 0.12;
+          const watermarkSize = parseInt($('pdfWatermarkSize').value, 10) || 72;
+          const pageNumbersOn = $('pdfPageNumbersToggle').checked;
+
+          ['content-balance', 'content-resultados', 'content-flujos', 'content-patrimonio'].forEach(id => { if ($(id)) $(id).classList.remove('hidden'); });
+
+          const headerDiv = document.createElement('div');
+          headerDiv.className = 'pdf-temp-header';
+
+          // build header children with classes (no inline styles)
+          if (includeHeaderLogo) {
+            const img = document.createElement('img');
+            img.src = logoDataUrl;
+            img.alt = 'Logo';
+            img.className = 'pdf-header-logo';
+            headerDiv.appendChild(img);
+          }
+          const txt = document.createElement('div');
+          txt.className = 'pdf-header-text';
+          const title = document.createElement('div');
+          title.className = 'pdf-header-title';
+          title.textContent = $('companyName').value || 'Agronare S.A. de C.V.';
+          const dateDiv = document.createElement('div');
+          dateDiv.className = 'pdf-header-date';
+          const dateText = ($('reportDate').value) ? new Date($('reportDate').value + 'T12:00:00').toLocaleDateString('es-MX') : new Date().toLocaleDateString('es-MX');
+          dateDiv.textContent = `Reporte al ${dateText}`;
+          txt.appendChild(title);
+          txt.appendChild(dateDiv);
+          headerDiv.appendChild(txt);
+
+          const appRoot = document.querySelector('main');
+          appRoot.insertBefore(headerDiv, appRoot.firstChild);
+
+          const canvas = await html2canvas(appRoot, { scale: scale, useCORS: true, backgroundColor: getComputedStyle(document.body).backgroundColor });
+          headerDiv.remove();
+
+          const { jsPDF } = window.jspdf;
+          const pageSizes = { a4: { w: 210, h: 297 }, letter: { w: 216, h: 279 } };
+          const pageSize = pageSizes[size] || pageSizes.a4;
+          const pdf = new jsPDF({ orientation: orientation, unit: 'mm', format: [pageSize.w, pageSize.h] });
+
+          const margin = 10;
+          const usableWidth = pageSize.w - margin * 2;
+          const pxPerMm = canvas.width / usableWidth;
+          const pageHeightPx = Math.floor((pageSize.h - margin * 2) * pxPerMm);
+          const totalPages = Math.ceil(canvas.height / pageHeightPx);
+
+          const watermarkDataUrl = (watermarkOn && watermarkText) ? createWatermarkDataUrl(watermarkText, 1200, 1200, watermarkOpacity, watermarkSize) : null;
+
+          for (let p = 0; p < totalPages; p++) {
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.width = canvas.width;
+            const thisPageH = Math.min(pageHeightPx, canvas.height - (p * pageHeightPx));
+            pageCanvas.height = thisPageH;
+            const ctx = pageCanvas.getContext('2d');
+            ctx.fillStyle = getComputedStyle(document.body).backgroundColor || '#ffffff';
+            ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+            ctx.drawImage(canvas, 0, -p * pageHeightPx);
+            const pageDataUrl = pageCanvas.toDataURL('image/jpeg', 0.95);
+            const imgProps = pdf.getImageProperties(pageDataUrl);
+            const pdfImgWidth = usableWidth;
+            const pdfImgHeight = (imgProps.height * pdfImgWidth) / imgProps.width;
+
+            if (p > 0) pdf.addPage();
+            pdf.addImage(pageDataUrl, 'JPEG', margin, 12, pdfImgWidth, pdfImgHeight);
+
+            if (watermarkDataUrl) {
+              pdf.addImage(watermarkDataUrl, 'PNG', 0, 0, pageSize.w, pageSize.h);
+            }
+
+            pdf.setFontSize(9); pdf.setTextColor(100);
+            pdf.text(`${$('companyName').value || 'Agronare'}`, margin, pageSize.h - 8);
+            pdf.text(dateText, pageSize.w - margin - pdf.getTextWidth(dateText), pageSize.h - 8);
+
+            if (pageNumbersOn) {
+              pdf.text(`Página ${p + 1} de ${totalPages}`, pageSize.w / 2, pageSize.h - 8, { align: 'center' });
+            }
+          }
+
+          const filename = `agronare_reporte_${(new Date()).toISOString().split('T')[0]}.pdf`;
+          pdf.save(filename);
+          showStatus('PDF generado y descargado.');
+          setTimeout(hideStatus, 1400);
         } catch (err) {
-          console.error(err); alert('Error generando XLSX con logo. Intentando método básico sin logo.');
-          // Fallback simple: generar con SheetJS (sin logo)
-          exportXLSXSansLogo();
+          console.error('Error generando PDF:', err);
+          showStatus('Error al generar PDF. Revise la consola para más detalles.');
+        } finally {
+          hideLoader();
         }
       }
 
-      // Fallback si ExcelJS no funciona o logo produce CORS: export simple con SheetJS (sin logo embebido)
-      function exportXLSXSansLogo() {
-        const data = calculateFinancials();
-        const wb = XLSX.utils.book_new();
-        const balanceData = [
-          ['Balance General', $('companyName').value || '', `Al ${getReportHeader().reportDate}`], [],
-          ['ACTIVOS'], ['Activo Circulante'], ['Caja y Bancos', data.v.caja_bancos], ['Inversiones Temporales', data.v.inversiones_temp],
-          ['Clientes', data.v.clientes], ['Inventario', data.v.inventarios], ['Total Activo Circulante', data.totalActivoCirculante], [],
-          ['Activo Fijo'], ['Terrenos y Edificios', data.v.terrenos_edificios], ['Maquinaria y Equipo', data.v.maquinaria_equipo], ['Equipo de Transporte', data.v.equipo_transporte],
-          ['(-) Depreciación Acum.', data.v.depreciacion * -1], ['Total Activo Fijo Neto', data.totalActivoFijoNeto], [], ['TOTAL ACTIVOS', data.totalActivos],
-          [], ['PASIVOS Y PATRIMONIO'], ['Pasivo Circulante'], ['Proveedores', data.v.proveedores], ['Acreedores Diversos', data.v.acreedores], ['Préstamos Corto Plazo', data.v.prestamos_corto],
-          ['Impuestos por Pagar', data.v.impuestos_pagar], ['Total Pasivo Circulante', data.totalPasivoCirculante], [], ['Pasivo Largo Plazo'], ['Préstamos Largo Plazo', data.v.prestamos_largo], ['Total Pasivo Largo Plazo', data.totalPasivoLargoPlazo],
-          [], ['TOTAL PASIVOS', data.totalPasivos], [], ['Patrimonio'], ['Capital Social', data.v.capital_social], ['Utilidades Retenidas', data.v.utilidades_retenidas], ['Utilidad del Ejercicio', data.utilidadNeta],
-          ['Total Patrimonio', data.totalPatrimonio], [], ['TOTAL PASIVO + PATRIMONIO', data.totalPasivoPatrimonio]
-        ];
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(balanceData), 'Balance General');
-        const incomeData = [
-          ['Estado de Resultados', $('companyName').value || '', `Periodo terminado el ${getReportHeader().reportDate}`], [],
-          ['Ingresos por Ventas', data.v.ingresos_ventas], ['(-) Costo de Ventas', data.v.costo_ventas * -1], ['Utilidad Bruta', data.utilidadBruta], [],
-          ['Gastos Operativos'], ['Sueldos y Salarios', data.v.gastos_sueldos * -1], ['Renta y Alquileres', data.v.gastos_renta * -1], ['Servicios Públicos', data.v.gastos_servicios * -1],
-          ['Publicidad y Marketing', data.v.gastos_publicidad * -1], ['Total Gastos Operativos', data.gastosOperativos * -1], ['Utilidad Operativa (EBIT)', data.utilidadOperativa], [], ['(-) Gastos Financieros', data.v.gastos_financieros * -1],
-          ['Utilidad antes de Impuestos', data.utilidadAntesImpuestos], ['(-) Impuestos (ISR)', data.v.impuestos_isr * -1], ['UTILIDAD NETA', data.utilidadNeta]
-        ];
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(incomeData), 'Estado de Resultados');
-        const ratiosData = [
-          ['Ratios Financieros', $('companyName').value || '', `Al ${getReportHeader().reportDate}`], [], ['Ratio', 'Valor', 'Interpretación'],
-          ['Liquidez Corriente', formatNumber(data.liquidezCorriente), 'Capacidad para cubrir deudas a corto plazo.'],
-          ['Prueba Ácida', formatNumber(data.pruebaAcida), 'Capacidad para cubrir deudas a corto plazo sin vender inventario.'],
-          ['Nivel de Endeudamiento', `${formatNumber(data.endeudamiento * 100)}%`, 'Porcentaje de activos financiados por deuda.'],
-          ['Margen Neto', `${formatNumber(data.margenNeto * 100)}%`, 'Margen neto.'],
-          ['ROA', `${formatNumber(data.roa * 100)}%`, 'Retorno sobre activos.'],
-          ['ROE', `${formatNumber(data.roe * 100)}%`, 'Retorno sobre patrimonio.']
-        ];
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ratiosData), 'Ratios');
-        XLSX.writeFile(wb, `agronare_analisis_${(new Date()).toISOString().split('T')[0]}.xlsx`);
+      /* ----- Export XLSX con ExcelJS (logo en hoja) ----- */
+      async function exportXLSX() {
+        showLoader();
+        try {
+          const pngDataUrl = await svgToPngDataUrl(logoSVG, 400, 160);
+          const base64 = pngDataUrl.split(',')[1];
+          const data = calculateAll();
+          const workbook = new ExcelJS.Workbook();
+          workbook.creator = 'Agronare';
+          workbook.created = new Date();
+          const sheet = workbook.addWorksheet('Balance');
+
+          const imageId = workbook.addImage({ base64: base64, extension: 'png' });
+          sheet.addImage(imageId, { tl: { col: 0, row: 0 }, ext: { width: 160, height: 64 } });
+
+          sheet.getCell('C1').value = `${$('companyName').value || 'Agronare'}\nReporte: ${($('reportDate').value) ? new Date($('reportDate').value + 'T12:00:00').toLocaleDateString('es-MX') : new Date().toLocaleDateString('es-MX')}`;
+          sheet.getCell('C1').alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+          sheet.columns = [{ width: 50 }, { width: 18 }];
+
+          let r = 6;
+          const activosRows = [
+            ['Caja', data.caja], ['Bancos', data.bancos], ['Cuentas por Cobrar', data.cxp], ['Inventarios', data.inventarios], ['Anticipos', data.anticipos],
+            ['Terrenos (bruto)', data.terrenos], ['Maquinaria (bruto)', data.maquinaria], ['Vehículos (bruto)', data.vehiculos],
+            ['(-) Depreciación acumulada', -data.depreciacion_acum], ['Intangibles (neto)', data.intangibles], ['TOTAL ACTIVOS', data.total_activos]
+          ];
+          activosRows.forEach(row => {
+            sheet.getCell(`A${r}`).value = row[0];
+            sheet.getCell(`B${r}`).value = typeof row[1] === 'number' ? row[1] : 0;
+            sheet.getCell(`B${r}`).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00';
+            if (String(row[0]).toUpperCase().includes('TOTAL')) sheet.getRow(r).font = { bold: true };
+            r++;
+          });
+
+          r += 2;
+          const pasRows = [
+            ['Proveedores', data.proveedores], ['Préstamos CP', data.prestamos_cp], ['Impuestos por pagar', data.impuestos_pagar], ['Otras obligaciones corrientes', data.otras_corrientes],
+            ['Total Pasivos Corrientes', data.total_pasivo_corr], [], ['Deuda LP', data.deuda_lp], ['Provisiones LP', data.provisiones_lp], ['Total Pasivos No Corrientes', data.total_pasivo_lp],
+            ['TOTAL PASIVOS', data.total_pasivos], [], ['Capital social', data.capital_social], ['Reservas', data.reservas], ['Utilidades retenidas (final)', data.util_finales], ['PATRIMONIO TOTAL', data.patrimonio_total], ['TOTAL PASIVO + PATRIMONIO', data.total_pasivos + data.patrimonio_total]
+          ];
+          pasRows.forEach(row => {
+            if (row.length === 0) { r++; return; }
+            sheet.getCell(`A${r}`).value = row[0];
+            sheet.getCell(`B${r}`).value = typeof row[1] === 'number' ? row[1] : '';
+            if (typeof row[1] === 'number') sheet.getCell(`B${r}`).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00';
+            if (String(row[0]).toUpperCase().includes('TOTAL')) sheet.getRow(r).font = { bold: true };
+            r++;
+          });
+
+          const buffer = await workbook.xlsx.writeBuffer();
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `agronare_reporte_${(new Date()).toISOString().split('T')[0]}.xlsx`);
+          showStatus('Archivo Excel generado.');
+          setTimeout(hideStatus, 1400);
+        } catch (e) {
+          console.error('Error exportando XLSX', e);
+          showStatus('Error exportando XLSX. Revise la consola.');
+        } finally {
+          hideLoader();
+        }
       }
 
-      /* --- TABS --- */
-      const TABS = ['datos', 'balance', 'resultados', 'ratios', 'graficos'];
-      function switchTab(active) {
-        TABS.forEach(id => {
-          const tab = $(`tab-${id}`); const content = $(`content-${id}`); if (!tab || !content) return;
-          if (id === active) { tab.classList.add('active'); content.classList.remove('hidden'); } else { tab.classList.remove('active'); content.classList.add('hidden'); }
-        });
-        if (active === 'graficos') { if (!charts.balance) initCharts(); updateCharts(calculateFinancials()); }
-      }
+      /* ----- Eventos y wiring ----- */
+      inputIds.forEach(id => { const el = $(id); if (el) el.addEventListener('input', () => updateAll(false)); });
+      if ($('companyName')) $('companyName').addEventListener('input', () => updateAll(false));
+      if ($('reportDate')) $('reportDate').addEventListener('input', () => updateAll(false));
+      if ($('currencySelect')) $('currencySelect').addEventListener('change', () => updateAll(false));
+      if ($('verticalAnalysisToggle')) $('verticalAnalysisToggle').addEventListener('change', () => updateAll(false));
+      if ($('showDetailsToggle')) $('showDetailsToggle').addEventListener('change', () => updateAll(false));
 
-      /* --- Inicialización y listeners --- */
-      allInputIds.forEach(id => { const el = $(id); if (el) el.addEventListener('input', () => updateUI()); });
-      document.querySelectorAll('.tab-button').forEach(btn => btn.addEventListener('click', () => switchTab(btn.id.replace('tab-', ''))));
+      if ($('pdfScale')) $('pdfScale').addEventListener('input', () => $('pdfScaleVal').textContent = parseFloat($('pdfScale').value).toFixed(2));
+      if ($('pdfWatermarkOpacity')) $('pdfWatermarkOpacity').addEventListener('input', () => $('pdfWatermarkOpacityVal').textContent = parseFloat($('pdfWatermarkOpacity').value).toFixed(2));
+      if ($('pdfWatermarkSize')) $('pdfWatermarkSize').addEventListener('input', () => $('pdfWatermarkSizeVal').textContent = $('pdfWatermarkSize').value);
 
-      $('btn-save-json').addEventListener('click', saveToJsonFile);
-      $('btn-load-json').addEventListener('click', () => $('file-load').click());
-      $('file-load').addEventListener('change', loadFromJsonFile);
-      $('btn-reset').addEventListener('click', () => {
-        if (!confirm('¿Reiniciar todos los campos?')) return;
-        pushUndo();
-        allInputIds.forEach(id => {
-          const el = $(id); if (!el) return;
-          if (el.tagName === 'SELECT') el.selectedIndex = 0;
-          else if (el.type === 'date') el.valueAsDate = new Date();
-          else if (id === 'companyName') el.value = 'Agronare S.A. de C.V.';
-          else el.value = '';
+      if ($('btn-preview')) $('btn-preview').addEventListener('click', () => updateAll(true));
+      if ($('btn-save-local')) $('btn-save-local').addEventListener('click', () => saveToLocal(true));
+      if ($('btn-clear-local')) $('btn-clear-local').addEventListener('click', clearLocal);
+      if ($('btn-reset')) $('btn-reset').addEventListener('click', resetForm);
+      if ($('btn-save-json')) $('btn-save-json').addEventListener('click', saveJsonFile);
+      if ($('btn-load-json')) $('btn-load-json').addEventListener('click', () => $('file-load').click());
+      if ($('file-load')) $('file-load').addEventListener('change', loadJsonFile);
+      if ($('btn-export-xlsx')) $('btn-export-xlsx').addEventListener('click', exportXLSX);
+      if ($('btn-export-pdf')) $('btn-export-pdf').addEventListener('click', exportPDFWithOptions);
+
+      /* ----- Accessible tabs logic (actualiza ARIA y permite navegación por teclado) ----- */
+      const TABS = ['datos', 'balance', 'resultados', 'flujos', 'patrimonio', 'graficos'];
+      TABS.forEach(t => {
+        const btn = $(`tab-${t}`); if (!btn) return;
+        btn.setAttribute('role', 'tab');
+        btn.addEventListener('click', () => {
+          // visual
+          document.querySelectorAll('.tab-button').forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+            b.setAttribute('tabindex', '-1');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          btn.setAttribute('tabindex', '0');
+          btn.focus();
+
+          // paneles
+          document.querySelectorAll('.tab-content').forEach(c => {
+            c.classList.add('hidden');
+            c.setAttribute('aria-hidden', 'true');
+          });
+          const content = $(`content-${t}`);
+          if (content) {
+            content.classList.remove('hidden');
+            content.setAttribute('aria-hidden', 'false');
+            content.setAttribute('aria-labelledby', `tab-${t}`);
+          }
+
+          // actualizar gráficos si corresponde
+          if (t === 'graficos') { renderRatiosAndCharts(calculateAll()); }
         });
-        updateUI();
+
+        // accesibilidad: permitir navegación por teclado (flechas izquierda/derecha)
+        btn.addEventListener('keydown', (ev) => {
+          if (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft') {
+            ev.preventDefault();
+            const idx = TABS.indexOf(t);
+            const dir = ev.key === 'ArrowRight' ? 1 : -1;
+            const nxt = (idx + dir + TABS.length) % TABS.length;
+            const nextBtn = $(`tab-${TABS[nxt]}`);
+            if (nextBtn) nextBtn.click();
+          }
+        });
       });
-      $('btn-save-local').addEventListener('click', () => saveToLocal(true));
-      $('btn-clear-local').addEventListener('click', clearLocal);
-      $('btn-export-xlsx').addEventListener('click', exportXLSXWithLogo); // usa ExcelJS
-      $('btn-export-pdf').addEventListener('click', exportPDF);
-      $('btn-undo').addEventListener('click', undo);
 
-      (function initialLoad() {
+      function updateAll(saveLocal = true) {
+        const data = calculateAll();
+        renderBalance(data);
+        renderResultados(data);
+        renderFlujos(data);
+        renderPatrimonio(data);
+        const activeTab = document.querySelector('.tab-button.active');
+        if (activeTab && activeTab.id.includes('graficos')) {
+          renderRatiosAndCharts(data);
+        } else {
+          // ensure charts still reflect latest
+          renderRatiosAndCharts(data);
+        }
+        if (saveLocal) saveToLocal(false);
+      }
+
+      /* ----- Inicialización ----- */
+      (function init() {
+        // theme from localStorage
+        const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+        setTheme(savedTheme);
+
+        if ($('reportDate')) $('reportDate').valueAsDate = new Date();
         const raw = localStorage.getItem(LS_KEY);
-        if (raw) applyDataToForm(JSON.parse(raw)); else $('reportDate').valueAsDate = new Date();
-        switchTab('datos'); updateUI(false);
-        undoStack.pop(); // limpiar auto-save inicial
-        pushUndo(); $('btn-undo').disabled = true;
+        if (raw) { try { applyForm(JSON.parse(raw)); } catch (e) { console.warn('Datos locales inválidos'); } }
+        // asegurar atributos ARIA iniciales: marcar todos los panels como ocultos excepto el primero
+        TABS.forEach((t, i) => {
+          const btn = $(`tab-${t}`);
+          const panel = $(`content-${t}`);
+          if (btn) {
+            btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+            btn.setAttribute('tabindex', i === 0 ? '0' : '-1');
+            if (i === 0) btn.classList.add('active');
+          }
+          if (panel) {
+            panel.setAttribute('role', 'tabpanel');
+            panel.setAttribute('aria-labelledby', `tab-${t}`);
+            panel.setAttribute('tabindex', '0');
+            panel.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
+            if (i !== 0) panel.classList.add('hidden');
+            else panel.classList.remove('hidden');
+          }
+        });
+        const defaultTab = $('tab-datos'); if (defaultTab) defaultTab.focus();
+        updateAll(false);
       })();
 
-    });
+    })();
   </script>
 </body>
 
