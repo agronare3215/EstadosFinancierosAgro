@@ -336,7 +336,9 @@
         <button id="btn-copy-summary" class="btn" title="Copiar resumen ejecutivo al portapapeles">Copiar
           resumen</button>
 
-        <button id="btn-gemini-analysis" class="btn" title="Obtener análisis con IA (Gemini)">Analizar con IA</button>
+        <button id="btn-gemini-analysis" class="btn" title="Obtener análisis con IA (Gemini)">✨ Analizar con IA</button>
+        <button id="btn-scenario-planner" class="btn" title="Proyectar un escenario futuro con IA">✨ Proyectar
+          Escenario</button>
 
         <button id="btn-theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Cambiar tema">
           <span id="theme-icon">🌙</span>
@@ -822,6 +824,53 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Scenario Planner -->
+  <div id="scenario-modal" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center hidden z-50"
+    role="dialog" aria-modal="true" aria-labelledby="scenario-title">
+    <div class="bg-white dark:bg-[#071026] rounded-lg shadow-xl p-6 w-full max-w-4xl">
+      <h3 id="scenario-title" class="text-xl font-bold flex items-center gap-2">✨ Planificador de Escenarios con IA</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        <!-- Inputs -->
+        <div>
+          <h4 class="font-semibold mb-2">Define tus supuestos</h4>
+          <p class="small mb-4">Ingresa los cambios porcentuales que quieres proyectar. Usa valores negativos para
+            decrementos.</p>
+          <div class="space-y-4">
+            <div>
+              <label for="scenario-sales-change" class="small font-semibold">Cambio en Ventas Netas (%)</label>
+              <input id="scenario-sales-change" type="number"
+                class="w-full bg-slate-50 border rounded-lg px-3 py-2 mt-1 input-left input-field" value="10">
+            </div>
+            <div>
+              <label for="scenario-cogs-change" class="small font-semibold">Cambio en Costo de Ventas (%)</label>
+              <input id="scenario-cogs-change" type="number"
+                class="w-full bg-slate-50 border rounded-lg px-3 py-2 mt-1 input-left input-field" value="5">
+            </div>
+            <div>
+              <label for="scenario-opex-change" class="small font-semibold">Cambio en Gastos Operativos (%)</label>
+              <input id="scenario-opex-change" type="number"
+                class="w-full bg-slate-50 border rounded-lg px-3 py-2 mt-1 input-left input-field" value="2">
+            </div>
+          </div>
+          <button id="btn-generate-scenario" class="btn mt-6 bg-green-500 text-white w-full justify-center">Generar
+            Proyección</button>
+        </div>
+        <!-- Results -->
+        <div>
+          <h4 class="font-semibold mb-2">Resultados de la Proyección</h4>
+          <div id="scenario-content"
+            class="mt-3 small space-y-2 max-h-[50vh] overflow-y-auto p-3 rounded-lg border bg-slate-50 dark:bg-slate-800">
+            <p>Los resultados de tu escenario proyectado aparecerán aquí...</p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-end gap-2">
+        <button id="scenario-close" class="btn">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Loader -->
   <div id="loader" class="fixed inset-0 bg-white bg-opacity-80 flex flex-col items-center justify-center hidden z-50"
@@ -1593,6 +1642,97 @@
         }
       }
 
+      /* ----- Gemini Scenario Planner ----- */
+      async function proyectarEscenarioConGemini() {
+        const scenarioContent = $('scenario-content');
+        scenarioContent.innerHTML = '<p>Generando proyección...</p>';
+        showLoader();
+
+        try {
+          const baseData = calculateAll();
+          const salesChange = parseFloat($('scenario-sales-change').value) || 0;
+          const cogsChange = parseFloat($('scenario-cogs-change').value) || 0;
+          const opexChange = parseFloat($('scenario-opex-change').value) || 0;
+
+          const systemPrompt = `
+                Actúa como un modelo de proyección financiera. Tu tarea es tomar un estado de resultados base y un conjunto de supuestos de cambio para crear un estado de resultados proforma (proyectado).
+                Calcula los nuevos valores paso a paso y presenta los resultados de forma clara en español de México.
+                Al final, proporciona un breve análisis del impacto de los cambios en la rentabilidad.
+                Utiliza formato Markdown para la respuesta, con negritas para los títulos y una tabla para el estado proforma.
+            `;
+
+          const userQuery = `
+                Por favor, crea un estado de resultados proforma basado en los siguientes datos y supuestos:
+
+                **Estado de Resultados Base:**
+                - Ventas Netas: ${formatMoney(baseData.neto_ventas)}
+                - Costo de Ventas: ${formatMoney(baseData.costo_ventas)}
+                - Gastos Operativos (Sueldos + Renta + Marketing): ${formatMoney(baseData.g_sueldos + baseData.g_renta + baseData.g_mark)}
+                - Depreciación: ${formatMoney(baseData.g_depr)}
+                - Gastos por Intereses: ${formatMoney(baseData.g_inter)}
+                - Impuestos: ${formatMoney(baseData.impuestos)}
+
+                **Supuestos para la Proyección:**
+                - Cambio en Ventas Netas: ${salesChange}%
+                - Cambio en Costo de Ventas: ${cogsChange}%
+                - Cambio en Gastos Operativos: ${opexChange}%
+                (Asumir que Depreciación, Intereses e Impuestos permanecen constantes para esta proyección simple)
+
+                **Instrucciones:**
+                1. Calcula las nuevas Ventas Netas.
+                2. Calcula el nuevo Costo de Ventas.
+                3. Calcula la nueva Utilidad Bruta.
+                4. Calcula los nuevos Gastos Operativos.
+                5. Calcula la nueva Utilidad Operativa (EBIT).
+                6. Calcula la nueva Utilidad Neta (después de intereses e impuestos constantes).
+                7. Calcula el nuevo Margen Bruto y el nuevo Margen Neto.
+                8. Presenta el estado de resultados proforma en una tabla simple con columnas para 'Concepto', 'Valor Proyectado' y 'Cambio vs Base'.
+                9. Escribe un análisis de 1-2 párrafos sobre cómo estos cambios afectan la utilidad bruta, la utilidad neta y los márgenes.
+            `;
+
+          const apiKey = ""; // Canvas will provide this
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+          const payload = {
+            contents: [{ parts: [{ text: userQuery }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] }
+          };
+
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) throw new Error(`Error de la API: ${response.status}`);
+
+          const result = await response.json();
+          const candidate = result.candidates?.[0];
+
+          if (candidate && candidate.content?.parts?.[0]?.text) {
+            let text = candidate.content.parts[0].text;
+            // Basic markdown to HTML
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
+            text = text.replace(/\|(.*?)\|/g, (match, content) => `</td><td class="border p-1">${content.trim()}</td>`);
+            text = text.replace(/<\/td><td class="border p-1">/g, (match, offset) => (offset === 0 ? '' : '</td><td class="border p-1">'));
+            text = text.replace(/<\/tr>(\s*<br\s*\/?>\s*)?<br\s*\/?>/g, '</tr>');
+            text = text.replace(/<br\s*\/?>\s*<td/g, '<tr><td');
+            text = text.replace(/<br\s*\/?>/g, '<br>');
+            scenarioContent.innerHTML = `<div class="prose dark:prose-invert max-w-none">${text}</div>`.replace(/<br>/g, '<br/>');
+
+          } else {
+            scenarioContent.innerHTML = '<p class="text-red-500">No se pudo generar la proyección.</p>';
+          }
+
+        } catch (error) {
+          console.error('Error en la proyección de escenario:', error);
+          scenarioContent.innerHTML = `<p class="text-red-500">Hubo un error al generar la proyección. Por favor, intenta de nuevo.</p>`;
+        } finally {
+          hideLoader();
+        }
+      }
+
+
       /* ----- Eventos y wiring ----- */
       inputIds.forEach(id => { const el = $(id); if (el) el.addEventListener('input', () => updateAll(false)); });
       if ($('companyName')) $('companyName').addEventListener('input', () => updateAll(false));
@@ -1620,6 +1760,11 @@
 
       if ($('btn-gemini-analysis')) $('btn-gemini-analysis').addEventListener('click', analizarConGemini);
       if ($('gemini-close')) $('gemini-close').addEventListener('click', () => $('gemini-modal').classList.add('hidden'));
+
+      if ($('btn-scenario-planner')) $('btn-scenario-planner').addEventListener('click', () => $('scenario-modal').classList.remove('hidden'));
+      if ($('scenario-close')) $('scenario-close').addEventListener('click', () => $('scenario-modal').classList.add('hidden'));
+      if ($('btn-generate-scenario')) $('btn-generate-scenario').addEventListener('click', proyectarEscenarioConGemini);
+
 
       if ($('btn-show-formulas')) $('btn-show-formulas').addEventListener('click', () => $('formulas-modal').classList.remove('hidden'));
       if ($('formulas-close')) $('formulas-close').addEventListener('click', () => $('formulas-modal').classList.add('hidden'));
@@ -1794,7 +1939,7 @@
         // events: close modals with ESC
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') {
-            ['help-modal', 'formulas-modal', 'confirm-modal', 'gemini-modal'].forEach(id => { const m = $(id); if (m && !m.classList.contains('hidden')) m.classList.add('hidden'); });
+            ['help-modal', 'formulas-modal', 'confirm-modal', 'gemini-modal', 'scenario-modal'].forEach(id => { const m = $(id); if (m && !m.classList.contains('hidden')) m.classList.add('hidden'); });
           }
         });
 
