@@ -4,51 +4,41 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0f172a" />
+
     <title>Agronare • Estados Financieros</title>
 
     <!-- PWA -->
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f172a" />
+    <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
 
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-    <link rel="apple-touch-icon" href="/icons/icon-180.png" />
-
-    <!-- Si usas PostCSS/Tailwind en build puedes quitar el CDN en producción -->
-    <link rel="stylesheet" href="/src/style.css" />
-
-    <!-- Estilos propios (están en src/) -->
-    <link rel="stylesheet" href="/src/style.css" />
-
-    <!-- Librerías usadas por main.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <!-- Estilos propios (local) -->
+    <link rel="stylesheet" href="style.css" />
+    <meta name="description" content="Herramienta para crear y exportar estados financieros — Agronare" />
 </head>
 
-<body class="h-full bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+<body class="h-full">
     <a href="#main" class="sr-only focus:not-sr-only">Saltar al contenido</a>
 
     <!-- TOP BAR -->
-    <nav class="sticky top-0 z-20 border-b bg-white/70 backdrop-blur dark:bg-slate-900/70">
-        <div class="mx-auto max-w-6xl px-4 py-2 flex items-center gap-3">
-            <img id="companyLogoImg" src="" alt="Logo de la compañía" class="h-9 w-9 rounded-md border" />
-            <div class="text-lg font-semibold">Agronare • Estados Financieros</div>
-            <div class="ml-auto flex items-center gap-2">
-                <button id="btn-toggle-theme" class="px-3 py-1 rounded border text-sm" aria-pressed="false">🌙
-                    Oscuro</button>
+    <nav>
+        <div class="container">
+            <img id="companyLogoImg" src="" alt="Logo de la compañía" class="h-9 w-9 rounded-md" />
+            <div class="text-lg">Agronare • Estados Financieros</div>
+            <div style="margin-left:auto; display:flex; gap:.5rem; align-items:center;">
+                <button id="btn-toggle-theme" aria-pressed="false">🌙 Oscuro</button>
                 <span id="app-status" class="sr-only" aria-live="polite"></span>
             </div>
         </div>
     </nav>
 
     <main id="main" class="mx-auto max-w-6xl px-4 py-6">
-        <!-- (aquí va exactamente tu contenido form que usas; lo dejé igual al anterior) -->
         <!-- ENCABEZADO -->
-        <section class="bg-white dark:bg-slate-800 rounded-lg border p-4 mb-4">
-            <div class="grid gap-3 md:grid-cols-4">
+        <section class="bg-white rounded-lg border p-4 mb-4">
+            <div class="grid md:grid-cols-4 gap-3">
                 <label class="block">
                     <span class="text-sm">Compañía</span>
                     <input id="companyName" type="text" class="input-field w-full" value="Agronare S.A. de C.V."
@@ -73,6 +63,7 @@
                         aria-label="Subir logo de la compañía" />
                 </label>
             </div>
+
             <div class="mt-3">
                 <label class="block">
                     <span class="text-sm">Notas del reporte</span>
@@ -83,8 +74,8 @@
         </section>
 
         <!-- ACCIONES -->
-        <section class="bg-white dark:bg-slate-800 rounded-lg border p-4 mb-4">
-            <div class="flex flex-wrap gap-2">
+        <section class="bg-white rounded-lg border p-4 mb-4">
+            <div class="flex" style="gap:.5rem; flex-wrap:wrap;">
                 <button id="btn-preview" class="px-3 py-2 rounded border">Actualizar</button>
                 <button id="btn-save-local" class="px-3 py-2 rounded border">Guardar en navegador</button>
                 <button id="btn-clear-local" class="px-3 py-2 rounded border">Borrar guardado</button>
@@ -92,6 +83,7 @@
 
                 <button id="btn-save-json" class="px-3 py-2 rounded border">Descargar JSON</button>
 
+                <!-- input oculto con label accesible -->
                 <label for="file-load" class="sr-only">Seleccionar archivo JSON</label>
                 <input id="file-load" type="file" class="hidden" accept=".json" aria-hidden="true" />
                 <button id="btn-load-json" class="px-3 py-2 rounded border" aria-controls="file-load">Cargar
@@ -104,24 +96,319 @@
             </div>
         </section>
 
-        <!-- (el resto de tu HTML: opciones PDF, tabs, paneles, etc.) -->
-        <!-- ... mantuve exactamente el HTML que ya tenías (por longitud no lo repito todo otra vez) ... -->
-        <!-- Si quieres que te lo pegue completo otra vez lo hago, pero ya está en tu proyecto. -->
-    </main>
+        <!-- OPCIONES PDF -->
+        <section class="bg-white rounded-lg border p-4 mb-4">
+            <h3 class="font-semibold mb-2">Opciones de PDF</h3>
+            <div class="grid md:grid-cols-6 gap-3">
+                <label class="block">
+                    <span class="text-sm">Tamaño</span>
+                    <select id="pdfSize" class="input-field w-full" title="Tamaño de página">
+                        <option value="a4">A4</option>
+                        <option value="letter">Carta</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="text-sm">Orientación</span>
+                    <select id="pdfOrientation" class="input-field w-full" title="Orientación de página">
+                        <option value="portrait">Vertical</option>
+                        <option value="landscape">Horizontal</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="text-sm">Escala <span id="pdfScaleVal" class="text-slate-500">2.00</span></span>
+                    <input id="pdfScale" type="range" min="1" max="3" step="0.05" value="2" class="w-full"
+                        aria-label="Escala de renderizado del PDF" />
+                </label>
+                <label class="block">
+                    <span class="text-sm">Fuente cabecera</span>
+                    <input id="pdfHeaderFont" type="text" class="input-field w-full" value="Inter, Arial, sans-serif"
+                        placeholder="Fuente para cabecera" />
+                </label>
+                <label class="flex items-center gap-2" style="display:flex; align-items:center; gap:.5rem;">
+                    <input id="pdfHeaderLogo" type="checkbox" />
+                    <span>Incluir logo en cabecera</span>
+                </label>
+                <label class="flex items-center gap-2" style="display:flex; align-items:center; gap:.5rem;">
+                    <input id="pdfPageNumbersToggle" type="checkbox" checked />
+                    <span>Numerar páginas</span>
+                </label>
+            </div>
 
-    <!-- LOADER -->
-    <div id="loader" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm" aria-hidden="true">
-        <div class="w-full h-full flex items-center justify-center">
-            <div class="px-4 py-3 rounded-lg bg-white dark:bg-slate-800 border shadow">
-                Generando…
+            <div class="grid md:grid-cols-3 gap-3 mt-3">
+                <label class="flex items-center gap-2" style="display:flex; align-items:center; gap:.5rem;">
+                    <input id="pdfWatermarkToggle" type="checkbox" />
+                    <span>Marca de agua</span>
+                </label>
+                <label class="block">
+                    <span class="text-sm">Texto marca de agua</span>
+                    <input id="pdfWatermarkText" type="text" class="input-field w-full" placeholder="CONFIDENCIAL" />
+                </label>
+                <label class="block">
+                    <span class="text-sm">Opacidad <span id="pdfWatermarkOpacityVal"
+                            class="text-slate-500">0.12</span></span>
+                    <input id="pdfWatermarkOpacity" type="range" min="0.02" max="0.5" step="0.02" value="0.12"
+                        class="w-full" aria-label="Opacidad de marca de agua" />
+                </label>
+                <label class="block">
+                    <span class="text-sm">Tamaño <span id="pdfWatermarkSizeVal" class="text-slate-500">72</span></span>
+                    <input id="pdfWatermarkSize" type="range" min="24" max="120" step="1" value="72" class="w-full"
+                        aria-label="Tamaño de marca de agua" />
+                </label>
+            </div>
+        </section>
+
+        <!-- TABS -->
+        <div role="tablist" aria-label="Secciones del reporte" class="flex flex-wrap gap-2 mb-3">
+            <button role="tab" id="tab-datos" aria-controls="content-datos" aria-selected="true"
+                class="tab-button">Datos</button>
+            <button role="tab" id="tab-balance" aria-controls="content-balance" aria-selected="false"
+                class="tab-button">Balance</button>
+            <button role="tab" id="tab-resultados" aria-controls="content-resultados" aria-selected="false"
+                class="tab-button">Resultados</button>
+            <button role="tab" id="tab-flujos" aria-controls="content-flujos" aria-selected="false"
+                class="tab-button">Flujos</button>
+            <button role="tab" id="tab-patrimonio" aria-controls="content-patrimonio" aria-selected="false"
+                class="tab-button">Patrimonio</button>
+            <button role="tab" id="tab-graficos" aria-controls="content-graficos" aria-selected="false"
+                class="tab-button">Gráficos & Razones</button>
+        </div>
+
+        <!-- PANEL: DATOS -->
+        <section id="content-datos">
+            <div id="main-form" class="bg-white rounded-lg border p-4">
+                <!-- ACTIVO -->
+                <h3 class="font-semibold text-blue-700 mb-2">Activo</h3>
+                <div class="grid md:grid-cols-4 gap-3">
+                    <label class="block">Caja
+                        <input id="caja" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Bancos
+                        <input id="bancos" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Cuentas por cobrar
+                        <input id="cxp" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Inventarios
+                        <input id="inventarios" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Terrenos
+                        <input id="terrenos" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Maquinaria
+                        <input id="maquinaria" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Vehículos
+                        <input id="vehiculos" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Depreciación acumulada
+                        <input id="depreciacion_acum" class="input-field w-full" type="text" value="0"
+                            placeholder="0.00" />
+                    </label>
+                    <label class="block md:col-span-2">Intangibles
+                        <input id="intangibles" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                </div>
+
+                <!-- PASIVO -->
+                <h3 class="font-semibold text-orange-700 mt-6 mb-2">Pasivo</h3>
+                <div class="grid md:grid-cols-4 gap-3">
+                    <label class="block">Proveedores
+                        <input id="proveedores" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Préstamos CP
+                        <input id="prestamos_cp" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Impuestos por pagar
+                        <input id="impuestos_pagar" class="input-field w-full" type="text" value="0"
+                            placeholder="0.00" />
+                    </label>
+                    <label class="block">Deuda LP
+                        <input id="deuda_lp" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                </div>
+
+                <!-- PATRIMONIO -->
+                <h3 class="font-semibold text-emerald-700 mt-6 mb-2">Patrimonio</h3>
+                <div class="grid md:grid-cols-4 gap-3">
+                    <label class="block">Capital social
+                        <input id="capital_social" class="input-field w-full" type="text" value="0"
+                            placeholder="0.00" />
+                    </label>
+                    <label class="block">Reservas
+                        <input id="reservas" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block md:col-span-2">Utilidades retenidas (inicio)
+                        <input id="utilidades_retenidas" class="input-field w-full" type="text" value="0"
+                            placeholder="0.00" />
+                    </label>
+                </div>
+
+                <!-- RESULTADOS -->
+                <h3 class="font-semibold text-slate-700 mt-6 mb-2">Estado de Resultados (movimientos)</h3>
+                <div class="grid md:grid-cols-4 gap-3">
+                    <label class="block">Ventas brutas
+                        <input id="ventas_net" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Devoluciones/Descuentos
+                        <input id="devoluciones" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Costo de ventas
+                        <input id="costo_ventas" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Gasto sueldos
+                        <input id="gasto_sueldos" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Gasto renta
+                        <input id="gasto_renta" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Gasto marketing
+                        <input id="gasto_marketing" class="input-field w-full" type="text" value="0"
+                            placeholder="0.00" />
+                    </label>
+                    <label class="block">Gasto intereses
+                        <input id="gasto_intereses" class="input-field w-full" type="text" value="0"
+                            placeholder="0.00" />
+                    </label>
+                    <label class="block">Impuestos (ISR/PTU)
+                        <input id="impuestos_calc" class="input-field w-full" type="text" value="0"
+                            placeholder="0.00" />
+                    </label>
+                </div>
+
+                <!-- FLUJOS -->
+                <h3 class="font-semibold text-slate-700 mt-6 mb-2">Ajustes para flujos</h3>
+                <div class="grid md:grid-cols-4 gap-3">
+                    <label class="block">Δ CxC
+                        <input id="delta_cxc" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Δ Inventarios
+                        <input id="delta_inventarios" class="input-field w-full" type="text" value="0"
+                            placeholder="0.00" />
+                    </label>
+                    <label class="block">Δ CxP
+                        <input id="delta_cxp" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">CAPEX
+                        <input id="capex" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Venta de activos
+                        <input id="venta_activo" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Deuda emitida
+                        <input id="deuda_emitida" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Deuda pagada
+                        <input id="deuda_pagada" class="input-field w-full" type="text" value="0" placeholder="0.00" />
+                    </label>
+                    <label class="block">Dividendos pagados
+                        <input id="dividendos_pag" class="input-field w-full" type="text" value="0"
+                            placeholder="0.00" />
+                    </label>
+                </div>
+
+                <div class="mt-4">
+                    <label class="inline-flex items-center gap-2">
+                        <input id="verticalAnalysisToggle" type="checkbox" />
+                        <span>Análisis vertical en tablas</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- IMPORTADOR CSV -->
+            <section id="content-import" class="bg-slate-50 p-4 rounded-lg border mt-4">
+                <h3 class="text-lg font-semibold mb-2">Importar balanza (CSV)</h3>
+                <p class="text-sm text-slate-600 mb-2">
+                    Sube un CSV con columnas: <strong>No. de cuenta</strong>, <strong>Descripción</strong>,
+                    <strong>Debe</strong>, <strong>Haber</strong> o <strong>Saldo final</strong>.
+                </p>
+                <label for="trial-file" class="sr-only">Seleccionar balanza (CSV)</label>
+                <input id="trial-file" type="file" accept=".csv" class="no-print"
+                    aria-label="Seleccionar archivo CSV de balanza" />
+                <div id="import-log" class="text-xs text-slate-500 mt-2"></div>
+            </section>
+        </section>
+
+        <!-- PANEL: BALANCE -->
+        <section id="content-balance" class="hidden"></section>
+
+        <!-- PANEL: RESULTADOS -->
+        <section id="content-resultados" class="hidden"></section>
+
+        <!-- PANEL: FLUJOS -->
+        <section id="content-flujos" class="hidden"></section>
+
+        <!-- PANEL: PATRIMONIO -->
+        <section id="content-patrimonio" class="hidden"></section>
+
+        <!-- PANEL: GRÁFICOS -->
+        <section id="content-graficos" class="hidden">
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="bg-white rounded-lg border p-4">
+                    <h3 class="font-semibold mb-2">Comparativo Balance</h3>
+                    <div class="aspect-3-2">
+                        <canvas id="chart-balance" aria-label="Gráfico de balance" role="img"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg border p-4">
+                    <h3 class="font-semibold mb-2">Composición de Resultados</h3>
+                    <div class="aspect-3-2">
+                        <canvas id="chart-result" aria-label="Gráfico de resultados" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 grid md:grid-cols-5 gap-3">
+                <div class="ratio-tile">
+                    <div class="text-xs text-slate-500">Liquidez corriente</div>
+                    <div id="ratio-liquidez" class="text-lg font-semibold">N/A</div>
+                </div>
+                <div class="ratio-tile">
+                    <div class="text-xs text-slate-500">Endeudamiento</div>
+                    <div id="ratio-endeudamiento" class="text-lg font-semibold">N/A</div>
+                </div>
+                <div class="ratio-tile">
+                    <div class="text-xs text-slate-500">Margen neto</div>
+                    <div id="ratio-margen" class="text-lg font-semibold">N/A</div>
+                </div>
+                <div class="ratio-tile">
+                    <div class="text-xs text-slate-500">ROA</div>
+                    <div id="ratio-roa" class="text-lg font-semibold">N/A</div>
+                </div>
+                <div class="ratio-tile">
+                    <div class="text-xs text-slate-500">ROE</div>
+                    <div id="ratio-roe" class="text-lg font-semibold">N/A</div>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-white rounded-lg border p-4">
+                <h3 class="font-semibold mb-2">Análisis automático (IA)</h3>
+                <div id="gemini-analysis-result" class="prose prose-sm dark:prose-invert max-w-none">
+                    <p class="text-sm text-slate-500">Pulsa “Análisis con IA” en la barra de acciones.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOADER -->
+        <div id="loader" class="hidden fixed inset-0" aria-hidden="true">
+            <div class="w-full h-full flex items-center justify-center">
+                <div class="px-4 py-3 rounded-lg bg-white border shadow">Generando…</div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- JS principal (módulo) -->
-    <script type="module" src="/src/main.js"></script>
+    <!-- Librerías locales (colócalas en la carpeta /libs) -->
+    <!-- Asegúrate de descargar las versiones que necesitas y colocarlas aquí -->
+    <script src="libs/chart.umd.min.js"></script>
+    <script src="libs/html2canvas.min.js"></script>
+    <script src="libs/jspdf.umd.min.js"></script>
+    <script src="libs/exceljs.min.js"></script>
+    <script src="libs/FileSaver.min.js"></script>
+    <script src="libs/papaparse.min.js"></script>
 
-    <!-- Importador CSV: fallback si no está en main.js -->
+    <!-- JS PRINCIPAL local -->
+    <script src="main.js"></script>
+
+    <!-- Importador: si el main no conecta el importador, este fragmento lo asegura -->
     <script>
         const trial = document.getElementById('trial-file');
         if (trial) {

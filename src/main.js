@@ -1,6 +1,3 @@
-/* pega aquí el contenido completo de main.js que ya me enviaste (lo he revisado y está listo) */
-
-/* --- INICIO main.js --- */
 (() => {
     // helpers
     const $ = (id) => document.getElementById(id);
@@ -169,7 +166,7 @@
         const g_sueldos = getNum('gasto_sueldos'),
             g_renta = getNum('gasto_renta'),
             g_mark = getNum('gasto_marketing'),
-            g_inter = getNum('gasto_intereses'); // <--- nombre correcto
+            g_inter = getNum('gasto_intereses');
         const gastos_operativos = g_sueldos + g_renta + g_mark;
         const utilidad_operativa = utilidad_bruta - gastos_operativos;
         const resultado_antes_impuestos = utilidad_operativa - g_inter;
@@ -331,7 +328,7 @@
         <tfoot>
           ${buildRow('TOTAL PASIVOS', data.total_pasivos, true)}
         </tfoot>
-        <thead><tr><th class="pt-4 text-left">Patrimonio</th><th></th>${verticalOn ? '<th></th>' : ''}</tr></thead>
+        <thead><tr class="pt-4 text-left"><th>Patrimonio</th><th></th>${verticalOn ? '<th></th>' : ''}</tr></thead>
         <tbody>
           ${buildRow('Capital Social', data.capital_social)}
           ${buildRow('Reservas', data.reservas)}
@@ -559,6 +556,12 @@
             localStorage.setItem(LS_KEY, JSON.stringify(collectForm()));
             if (show) showStatus('Datos guardados en el navegador.');
             setTimeout(hideStatus, 1600);
+            // inform Service Worker that data changed (optional)
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                try {
+                    navigator.serviceWorker.controller.postMessage({ type: 'DATA_SAVED', key: LS_KEY });
+                } catch { }
+            }
         } catch (e) {
             console.error(e);
             showStatus('Error guardando localmente.');
@@ -958,54 +961,33 @@
 
             const userQuery = `Por favor, analiza los siguientes datos financieros de la empresa: ${JSON.stringify(summaryForAI, null, 2)}`;
 
-            const apiKey = ""; // La API key se gestiona en el entorno de ejecución
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
-                },
-            };
-
-            let responseText = '';
-            let retries = 3;
-            let delay = 1000;
-
-            while (retries > 0) {
-                const response = await fetch(apiUrl, {
+            // NOTE: No incluimos API key en el cliente. Debes exponer un endpoint en tu servidor que llame a la API segura.
+            // Aquí dejamos la lógica de petición preparada para usar un endpoint propio que actúe como proxy seguro.
+            // Ejemplo (no operativo hasta que implementes /api/generate-analysis en tu backend):
+            try {
+                const resp = await fetch('/api/generate-analysis', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ systemPrompt, userQuery })
                 });
 
-                if (response.ok) {
-                    const result = await response.json();
-                    const candidate = result.candidates?.[0];
-                    if (candidate && candidate.content?.parts?.[0]?.text) {
-                        responseText = candidate.content.parts[0].text;
-                        break; // Éxito, salir del bucle
-                    }
-                }
+                if (!resp.ok) throw new Error('Error en el servidor de análisis');
 
-                retries--;
-                if (retries > 0) {
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2; // Backoff exponencial
-                } else {
-                    throw new Error('No se pudo obtener una respuesta válida del modelo de IA después de varios intentos.');
-                }
+                const json = await resp.json();
+                const responseText = json?.text || 'No se recibió respuesta del servicio de IA.';
+                // Render básico de Markdown
+                const formattedHtml = responseText
+                    .replace(/### (.*)/g, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')
+                    .replace(/## (.*)/g, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>')
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\* ([^*]+)/g, '<li class="ml-5 list-disc">$1</li>')
+                    .replace(/\n/g, '<br>');
+
+                resultContainer.innerHTML = `<div class="prose prose-sm max-w-none dark:prose-invert">${formattedHtml}</div>`;
+            } catch (errInner) {
+                console.warn('Fallo llamando endpoint de IA, mostrando texto de fallback.', errInner);
+                resultContainer.innerHTML = `<p class="text-sm text-slate-500">No se pudo completar el análisis automático. Implementa un endpoint server-side /api/generate-analysis que llame a tu proveedor de modelos.</p>`;
             }
-
-            // Render básico de Markdown
-            const formattedHtml = responseText
-                .replace(/### (.*)/g, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')
-                .replace(/## (.*)/g, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>')
-                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                .replace(/\* ([^*]+)/g, '<li class="ml-5 list-disc">$1</li>')
-                .replace(/\n/g, '<br>');
-
-            resultContainer.innerHTML = `<div class="prose prose-sm max-w-none dark:prose-invert">${formattedHtml}</div>`;
 
         } catch (error) {
             console.error("Error al generar análisis financiero:", error);
@@ -1224,7 +1206,7 @@
         renderResultados(data);
         renderFlujos(data);
         renderPatrimonio(data);
-        verifyBalance(data);   // <--- nuevo control
+        verifyBalance(data);
         const activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
         if (activeTab && activeTab.id.includes('graficos')) renderRatiosAndCharts(data);
         if (saveLocal) saveToLocal(false);
@@ -1256,6 +1238,62 @@
             setTimeout(hideStatus, 1200);
         };
         reader.readAsDataURL(file);
+    }
+
+    /* ---------- CSV import (Trial Balance) ---------- */
+    async function importTrialBalanceCSV(file) {
+        const log = $('import-log');
+        if (!file) {
+            if (log) log.textContent = 'No se seleccionó archivo.';
+            return;
+        }
+        if (log) log.textContent = 'Leyendo archivo...';
+        try {
+            const text = await file.text();
+            const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+            if (parsed.errors && parsed.errors.length) {
+                console.warn(parsed.errors);
+            }
+            // Buscamos columnas habituales y sumamos en cuentas destino (map simple)
+            const mapping = {
+                'CAJA': 'caja',
+                'BANCOS': 'bancos',
+                'CUENTAS POR COBRAR': 'cxp',
+                'INVENTARIOS': 'inventarios',
+                'TERRENOS': 'terrenos',
+                'MAQUINARIA': 'maquinaria',
+                'VEHICULOS': 'vehiculos',
+                'DEPRECIACION': 'depreciacion_acum',
+                'PROVEEDORES': 'proveedores',
+                'PRESTAMOS': 'prestamos_cp',
+                'IMPUESTOS POR PAGAR': 'impuestos_pagar',
+                'DEUDA LP': 'deuda_lp',
+                'CAPITAL SOCIAL': 'capital_social'
+            };
+            const accum = {};
+            parsed.data.forEach((row) => {
+                const desc = (row['Descripción'] || row['Descripcion'] || row['DESCRIPCION'] || row['descripcion'] || '').toUpperCase();
+                const saldo = parseNumberFromFormatted(row['Saldo final'] || row['SaldoFinal'] || row['Saldo'] || row['saldo'] || row['Haber'] || row['Debe'] || 0);
+                Object.keys(mapping).forEach((k) => {
+                    if (desc.includes(k)) {
+                        const id = mapping[k];
+                        accum[id] = (accum[id] || 0) + saldo;
+                    }
+                });
+            });
+            Object.keys(accum).forEach((id) => {
+                if ($(id)) {
+                    $(id).dataset.raw = accum[id];
+                    $(id).value = formatMoney(accum[id]);
+                }
+            });
+            updateAll();
+            if (log) log.textContent = 'Balanza importada (se mapearon cuentas encontradas).';
+            setTimeout(() => { if (log) log.textContent = ''; }, 3000);
+        } catch (err) {
+            console.error('Error importando CSV', err);
+            if (log) log.textContent = 'Error importando CSV. Revisa la consola.';
+        }
     }
 
     /* ---------- Wiring ---------- */
@@ -1329,6 +1367,14 @@
                 saveToLocal(true);
             }
         });
+
+        // Importador CSV
+        if ($('trial-file')) {
+            $('trial-file').addEventListener('change', (e) => {
+                if (e.target.files[0]) importTrialBalanceCSV(e.target.files[0]);
+                e.target.value = '';
+            });
+        }
     }
 
     /* ---------- Inicialización ---------- */
@@ -1351,10 +1397,12 @@
     })();
 })();
 
-/* ------------------ Registro único del Service Worker ------------------ */
+/* ------------------ Registro único del Service Worker ------------------
+   Evita dobles registros (tú también lo tenías en el HTML). Deja sólo este. */
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', async () => {
         try {
+            // Usa el registro del scope raíz si ya existe
             const existing = await navigator.serviceWorker.getRegistration('/');
             if (!existing) {
                 const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
