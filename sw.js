@@ -1,17 +1,15 @@
-// sw.js (tolerante)
 const CACHE_NAME = 'agronare-v3';
 
 const ASSETS = [
-    '/',                    // si sirves la raíz
+    '/',
     '/index.html',
-    '/dist/index.html',
-    '/style.css',
+    '/src/style.css',
     '/src/main.js',
     '/manifest.json',
-    '/public/icons/icon-16.png',
-    '/public/icons/icon-32.png',
-    '/public/icons/icon-180.png',
-    '/public/icons/icon-512.png',
+    '/icons/icon-16.png',
+    '/icons/icon-32.png',
+    '/icons/icon-180.png',
+    '/icons/icon-512.png',
     '/favicon.ico'
 ];
 
@@ -50,7 +48,6 @@ self.addEventListener('fetch', (evt) => {
     evt.respondWith((async () => {
         const cached = await caches.match(req);
         if (cached) {
-            // revalidación en background
             evt.waitUntil((async () => {
                 try {
                     const fresh = await fetch(req);
@@ -58,7 +55,7 @@ self.addEventListener('fetch', (evt) => {
                         const cache = await caches.open(CACHE_NAME);
                         await cache.put(req, fresh.clone());
                     }
-                } catch {/* sin red */ }
+                } catch {/* offline */ }
             })());
             return cached;
         }
@@ -71,7 +68,7 @@ self.addEventListener('fetch', (evt) => {
             return fresh;
         } catch {
             if (req.headers.get('accept')?.includes('text/html')) {
-                return (await caches.match('/dist/index.html')) || (await caches.match('/index.html')) || Response.error();
+                return (await caches.match('/index.html')) || Response.error();
             }
             return Response.error();
         }

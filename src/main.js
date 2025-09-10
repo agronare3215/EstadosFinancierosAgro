@@ -1,3 +1,6 @@
+/* pega aquí el contenido completo de main.js que ya me enviaste (lo he revisado y está listo) */
+
+/* --- INICIO main.js --- */
 (() => {
     // helpers
     const $ = (id) => document.getElementById(id);
@@ -8,18 +11,18 @@
 
     // logo SVG embebido por defecto (se usa si no subes logo)
     const defaultLogoSVG = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="400" height="160" viewBox="0 0 400 160">
-    <defs>
-      <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#06b6d4"/><stop offset="1" stop-color="#10b981"/></linearGradient>
-      <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#84cc16"/></linearGradient>
-    </defs>
-    <rect width="100%" height="100%" fill="white" rx="10"/>
-    <g transform="translate(40,10)">
-      <path d="M40 20 C 10 40, 10 80, 40 100 C 80 120, 120 80, 100 40 C 88 12, 60 -4, 40 20 Z" fill="url(#g1)"/>
-      <path d="M170 10 C 210 40, 220 90, 170 120 C 110 150, 60 130, 100 90 C 130 60, 170 10, 170 10 Z" fill="url(#g2)"/>
-    </g>
-    <text x="200" y="110" font-family="Georgia, serif" font-weight="700" font-size="36" fill="#0f5132">AGRONARE</text>
-  </svg>`;
+  <svg xmlns="http://www.w3.org/2000/svg" width="400" height="160" viewBox="0 0 400 160">
+    <defs>
+      <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#06b6d4"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+      <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#84cc16"/></linearGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="white" rx="10"/>
+    <g transform="translate(40,10)">
+      <path d="M40 20 C 10 40, 10 80, 40 100 C 80 120, 120 80, 100 40 C 88 12, 60 -4, 40 20 Z" fill="url(#g1)"/>
+      <path d="M170 10 C 210 40, 220 90, 170 120 C 110 150, 60 130, 100 90 C 130 60, 170 10, 170 10 Z" fill="url(#g2)"/>
+    </g>
+    <text x="200" y="110" font-family="Georgia, serif" font-weight="700" font-size="36" fill="#0f5132">AGRONARE</text>
+  </svg>`;
     let companyLogoDataUrl =
         'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(defaultLogoSVG)));
 
@@ -112,6 +115,12 @@
         return Number.isFinite(parsed) ? parsed : 0;
     }
 
+    // clamp para evitar NaN o números absurdos
+    function clampNumber(n, min = -1e15, max = 1e15) {
+        if (!Number.isFinite(n)) return 0;
+        return Math.max(min, Math.min(max, n));
+    }
+
     // getNum lee desde data-raw si existe (valor numérico), si no intenta parsear el contenido textual
     function getNum(id) {
         const el = $(id);
@@ -160,7 +169,7 @@
         const g_sueldos = getNum('gasto_sueldos'),
             g_renta = getNum('gasto_renta'),
             g_mark = getNum('gasto_marketing'),
-            g_inter = getNum('gasto_intereses');
+            g_inter = getNum('gasto_intereses'); // <--- nombre correcto
         const gastos_operativos = g_sueldos + g_renta + g_mark;
         const utilidad_operativa = utilidad_bruta - gastos_operativos;
         const resultado_antes_impuestos = utilidad_operativa - g_inter;
@@ -280,69 +289,69 @@
         const headerCols = verticalOn ? '<th class="text-right w-28">% Total</th>' : '';
 
         const activosTable = `
-      <h3 id="activos-sep" class="font-bold mb-2 text-blue-700">ACTIVOS</h3>
-      <table class="w-full text-sm" role="table" aria-label="Tabla de activos">
-        <thead><tr class="border-b"><th class="text-left">Activo Corriente</th><th class="text-right">Valor</th>${headerCols}</tr></thead>
-        <tbody>
-          ${buildRow('Caja', data.caja)}
-          ${buildRow('Bancos', data.bancos)}
-          ${buildRow('Cuentas por Cobrar', data.cxp)}
-          ${buildRow('Inventarios', data.inventarios)}
-          ${buildRow('Total Activos Corrientes', data.total_act_corr, true)}
-        </tbody>
-        <thead><tr><th class="pt-4 text-left">Activo No Corriente</th><th></th>${verticalOn ? '<th></th>' : ''}</tr></thead>
-        <tbody>
-          ${buildRow('Terrenos (bruto)', data.terrenos)}
-          ${buildRow('Maquinaria (bruto)', data.maquinaria)}
-          ${buildRow('Vehículos (bruto)', data.vehiculos)}
-          ${buildRow('(-) Depreciación acumulada', -data.depreciacion_acum)}
-          ${buildRow('Intangibles', data.intangibles)}
-          ${buildRow('Total Activos No Corrientes', data.total_act_no_corr, true)}
-        </tbody>
-        <tfoot>
-          ${buildRow('TOTAL ACTIVOS', data.total_activos, true)}
-        </tfoot>
-      </table>`;
+      <h3 id="activos-sep" class="font-bold mb-2 text-blue-700">ACTIVOS</h3>
+      <table class="w-full text-sm" role="table" aria-label="Tabla de activos">
+        <thead><tr class="border-b"><th class="text-left">Activo Corriente</th><th class="text-right">Valor</th>${headerCols}</tr></thead>
+        <tbody>
+          ${buildRow('Caja', data.caja)}
+          ${buildRow('Bancos', data.bancos)}
+          ${buildRow('Cuentas por Cobrar', data.cxp)}
+          ${buildRow('Inventarios', data.inventarios)}
+          ${buildRow('Total Activos Corrientes', data.total_act_corr, true)}
+        </tbody>
+        <thead><tr><th class="pt-4 text-left">Activo No Corriente</th><th></th>${verticalOn ? '<th></th>' : ''}</tr></thead>
+        <tbody>
+          ${buildRow('Terrenos (bruto)', data.terrenos)}
+          ${buildRow('Maquinaria (bruto)', data.maquinaria)}
+          ${buildRow('Vehículos (bruto)', data.vehiculos)}
+          ${buildRow('(-) Depreciación acumulada', -data.depreciacion_acum)}
+          ${buildRow('Intangibles', data.intangibles)}
+          ${buildRow('Total Activos No Corrientes', data.total_act_no_corr, true)}
+        </tbody>
+        <tfoot>
+          ${buildRow('TOTAL ACTIVOS', data.total_activos, true)}
+        </tfoot>
+      </table>`;
 
         const pasivosPatrimonioTable = `
-      <h3 id="pasivos-sep" class="font-bold mb-2 text-orange-700">PASIVOS Y PATRIMONIO</h3>
-      <table class="w-full text-sm" role="table" aria-label="Tabla de pasivos y patrimonio">
-        <thead><tr class="border-b"><th class="text-left">Pasivo Corriente</th><th class="text-right">Valor</th>${headerCols}</tr></thead>
-        <tbody>
-          ${buildRow('Proveedores', data.proveedores)}
-          ${buildRow('Préstamos Corto Plazo', data.prestamos_cp)}
-          ${buildRow('Impuestos por pagar', data.impuestos_pagar)}
-          ${buildRow('Total Pasivos Corrientes', data.total_pasivo_corr, true)}
-        </tbody>
-        <thead><tr><th class="pt-4 text-left">Pasivo No Corriente</th><th></th>${verticalOn ? '<th></th>' : ''}</tr></thead>
-        <tbody>
-          ${buildRow('Deuda Largo Plazo', data.deuda_lp)}
-          ${buildRow('Total Pasivos No Corrientes', data.total_pasivo_lp, true)}
-        </tbody>
-        <tfoot>
-          ${buildRow('TOTAL PASIVOS', data.total_pasivos, true)}
-        </tfoot>
-        <thead><tr><th class="pt-4 text-left">Patrimonio</th><th></th>${verticalOn ? '<th></th>' : ''}</tr></thead>
-        <tbody>
-          ${buildRow('Capital Social', data.capital_social)}
-          ${buildRow('Reservas', data.reservas)}
-          ${buildRow('Utilidades Retenidas (final)', data.util_finales)}
-          ${buildRow('PATRIMONIO TOTAL', data.patrimonio_total, true)}
-        </tbody>
-        <tfoot>
-          ${buildRow('TOTAL PASIVO + PATRIMONIO', data.total_pasivos + data.patrimonio_total, true)}
-        </tfoot>
-      </table>`;
+      <h3 id="pasivos-sep" class="font-bold mb-2 text-orange-700">PASIVOS Y PATRIMONIO</h3>
+      <table class="w-full text-sm" role="table" aria-label="Tabla de pasivos y patrimonio">
+        <thead><tr class="border-b"><th class="text-left">Pasivo Corriente</th><th class="text-right">Valor</th>${headerCols}</tr></thead>
+        <tbody>
+          ${buildRow('Proveedores', data.proveedores)}
+          ${buildRow('Préstamos Corto Plazo', data.prestamos_cp)}
+          ${buildRow('Impuestos por pagar', data.impuestos_pagar)}
+          ${buildRow('Total Pasivos Corrientes', data.total_pasivo_corr, true)}
+        </tbody>
+        <thead><tr><th class="pt-4 text-left">Pasivo No Corriente</th><th></th>${verticalOn ? '<th></th>' : ''}</tr></thead>
+        <tbody>
+          ${buildRow('Deuda Largo Plazo', data.deuda_lp)}
+          ${buildRow('Total Pasivos No Corrientes', data.total_pasivo_lp, true)}
+        </tbody>
+        <tfoot>
+          ${buildRow('TOTAL PASIVOS', data.total_pasivos, true)}
+        </tfoot>
+        <thead><tr><th class="pt-4 text-left">Patrimonio</th><th></th>${verticalOn ? '<th></th>' : ''}</tr></thead>
+        <tbody>
+          ${buildRow('Capital Social', data.capital_social)}
+          ${buildRow('Reservas', data.reservas)}
+          ${buildRow('Utilidades Retenidas (final)', data.util_finales)}
+          ${buildRow('PATRIMONIO TOTAL', data.patrimonio_total, true)}
+        </tbody>
+        <tfoot>
+          ${buildRow('TOTAL PASIVO + PATRIMONIO', data.total_pasivos + data.patrimonio_total, true)}
+        </tfoot>
+      </table>`;
 
         const html = `
-      <div class="mb-4">
-        <h2 class="text-2xl font-bold">Balance General</h2>
-        <p class="text-sm">${h.companyName} — Al ${h.reportDate}</p>
-      </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-slate-50 p-4 rounded-lg border" role="region">${activosTable}</div>
-        <div class="bg-slate-50 p-4 rounded-lg border" role="region">${pasivosPatrimonioTable}</div>
-      </div>`;
+      <div class="mb-4">
+        <h2 class="text-2xl font-bold">Balance General</h2>
+        <p class="text-sm">${h.companyName} — Al ${h.reportDate}</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-slate-50 p-4 rounded-lg border" role="region">${activosTable}</div>
+        <div class="bg-slate-50 p-4 rounded-lg border" role="region">${pasivosPatrimonioTable}</div>
+      </div>`;
         if ($('content-balance')) $('content-balance').innerHTML = html;
     }
 
@@ -363,95 +372,95 @@
         const headerCols = verticalOn ? `<th class="text-right w-28">% Ventas</th>` : '';
 
         const html = `
-      <div class="mb-4"><h2 class="text-2xl font-bold">Estado de Resultados</h2><p class="text-sm">${h.companyName} — Periodo: ${h.reportDate}</p></div>
-      <div class="bg-slate-50 p-4 rounded-lg border" role="region">
-      <table class="w-full text-sm" id="er-tabla">
-        <thead><tr class="border-b"><th class="text-left">Concepto</th><th class="text-right">Valor</th>${headerCols}</tr></thead>
-        <tbody>
-          ${buildRow('Ventas Brutas', data.ventas_net)}
-          ${buildRow('(-) Devoluciones', -data.devoluciones)}
-          ${buildRow('Ventas Netas', data.neto_ventas, true)}
-          ${buildRow('(-) Costo de Ventas', -data.costo_ventas)}
-          ${buildRow('Utilidad Bruta', data.utilidad_bruta, true)}
-          <tr><td class="pt-4">Gastos Operativos</td><td></td>${verticalOn ? '<td></td>' : ''}</tr>
-          ${buildRow('Sueldos', -data.g_sueldos, false, true)}
-          ${buildRow('Renta', -data.g_renta, false, true)}
-          ${buildRow('Marketing', -data.g_mark, false, true)}
-          ${buildRow('Total Gastos Operativos', -data.gastos_operativos, true)}
-          ${buildRow('Utilidad Operativa (EBIT)', data.utilidad_operativa, true)}
-          ${buildRow('(-) Gastos Financieros', -data.g_intereses)}
-          ${buildRow('Resultado antes de Ingresos', data.resultado_antes_impuestos, true)}
-          ${buildRow('(-) Impuestos', -data.impuestos)}
-        </tbody>
-        <tfoot>
-          ${buildRow('UTILIDAD NETA', data.utilidad_neta, true)}
-        </tfoot>
-      </table>
-      </div>`;
+      <div class="mb-4"><h2 class="text-2xl font-bold">Estado de Resultados</h2><p class="text-sm">${h.companyName} — Periodo: ${h.reportDate}</p></div>
+      <div class="bg-slate-50 p-4 rounded-lg border" role="region">
+      <table class="w-full text-sm" id="er-tabla">
+        <thead><tr class="border-b"><th class="text-left">Concepto</th><th class="text-right">Valor</th>${headerCols}</tr></thead>
+        <tbody>
+          ${buildRow('Ventas Brutas', data.ventas_net)}
+          ${buildRow('(-) Devoluciones', -data.devoluciones)}
+          ${buildRow('Ventas Netas', data.neto_ventas, true)}
+          ${buildRow('(-) Costo de Ventas', -data.costo_ventas)}
+          ${buildRow('Utilidad Bruta', data.utilidad_bruta, true)}
+          <tr><td class="pt-4">Gastos Operativos</td><td></td>${verticalOn ? '<td></td>' : ''}</tr>
+          ${buildRow('Sueldos', -data.g_sueldos, false, true)}
+          ${buildRow('Renta', -data.g_renta, false, true)}
+          ${buildRow('Marketing', -data.g_mark, false, true)}
+          ${buildRow('Total Gastos Operativos', -data.gastos_operativos, true)}
+          ${buildRow('Utilidad Operativa (EBIT)', data.utilidad_operativa, true)}
+          ${buildRow('(-) Gastos Financieros', -data.g_inter)}
+          ${buildRow('Resultado antes de Impuestos', data.resultado_antes_impuestos, true)}
+          ${buildRow('(-) Impuestos', -data.impuestos)}
+        </tbody>
+        <tfoot>
+          ${buildRow('UTILIDAD NETA', data.utilidad_neta, true)}
+        </tfoot>
+      </table>
+      </div>`;
         if ($('content-resultados')) $('content-resultados').innerHTML = html;
     }
 
     function renderFlujos(data) {
         const h = getReportHeader();
         const html = `
-      <div class="mb-4"><h2 class="text-2xl font-bold">Estado de Flujos de Efectivo</h2><p class="text-sm">${h.companyName} — Periodo: ${h.reportDate}</p></div>
-      <div class="bg-slate-50 p-4 rounded-lg border" role="region">
-        <table class="w-full text-sm" id="flujos-tabla">
-          <tr class="total-cell"><td>Flujo de Actividades de Operación</td><td class="text-right">${formatMoney(
+      <div class="mb-4"><h2 class="text-2xl font-bold">Estado de Flujos de Efectivo</h2><p class="text-sm">${h.companyName} — Periodo: ${h.reportDate}</p></div>
+      <div class="bg-slate-50 p-4 rounded-lg border" role="region">
+        <table class="w-full text-sm" id="flujos-tabla">
+          <tr class="total-cell"><td>Flujo de Actividades de Operación</td><td class="text-right">${formatMoney(
             data.flujo_operativo
         )}</td></tr>
-          <tr><td class="pl-4">Utilidad Neta</td><td class="text-right">${formatMoney(data.utilidad_neta)}</td></tr>
-          <tr><td class="pl-4">(+) Gastos de Intereses</td><td class="text-right">${formatMoney(data.g_intereses)}</td></tr>
-          <tr><td class="pl-4">(-) Δ Cuentas por Cobrar</td><td class="text-right">${formatMoney(-data.delta_cxc)}</td></tr>
-          <tr><td class="pl-4">(-) Δ Inventarios</td><td class="text-right">${formatMoney(-data.delta_inv)}</td></tr>
-          <tr><td class="pl-4">(+) Δ Cuentas por Pagar</td><td class="text-right">${formatMoney(data.delta_cxp)}</td></tr>
+          <tr><td class="pl-4">Utilidad Neta</td><td class="text-right">${formatMoney(data.utilidad_neta)}</td></tr>
+          <tr><td class="pl-4">(+) Gastos de Intereses</td><td class="text-right">${formatMoney(data.g_inter)}</td></tr>
+          <tr><td class="pl-4">(-) Δ Cuentas por Cobrar</td><td class="text-right">${formatMoney(-data.delta_cxc)}</td></tr>
+          <tr><td class="pl-4">(-) Δ Inventarios</td><td class="text-right">${formatMoney(-data.delta_inv)}</td></tr>
+          <tr><td class="pl-4">(+) Δ Cuentas por Pagar</td><td class="text-right">${formatMoney(data.delta_cxp)}</td></tr>
 
-          <tr class="total-cell"><td class="pt-4">Flujo de Actividades de Inversión</td><td class="text-right">${formatMoney(
+          <tr class="total-cell"><td class="pt-4">Flujo de Actividades de Inversión</td><td class="text-right">${formatMoney(
             data.flujo_inversion
         )}</td></tr>
-          <tr><td class="pl-4">(-) Compras de Activo Fijo (CAPEX)</td><td class="text-right">${formatMoney(
+          <tr><td class="pl-4">(-) Compras de Activo Fijo (CAPEX)</td><td class="text-right">${formatMoney(
             -data.capex
         )}</td></tr>
-          <tr><td class="pl-4">(+) Venta de Activos</td><td class="text-right">${formatMoney(data.venta_activo)}</td></tr>
+          <tr><td class="pl-4">(+) Venta de Activos</td><td class="text-right">${formatMoney(data.venta_activo)}</td></tr>
 
-          <tr class="total-cell"><td class="pt-4">Flujo de Actividades de Financiación</td><td class="text-right">${formatMoney(
+          <tr class="total-cell"><td class="pt-4">Flujo de Actividades de Financiación</td><td class="text-right">${formatMoney(
             data.flujo_financiamiento
         )}</td></tr>
-          <tr><td class="pl-4">(+) Nueva Deuda Emitida</td><td class="text-right">${formatMoney(data.deuda_emitida)}</td></tr>
-          <tr><td class="pl-4">(-) Pago de Deuda</td><td class="text-right">${formatMoney(-data.deuda_pagada)}</td></tr>
-          <tr><td class="pl-4">(-) Dividendos Pagados</td><td class="text-right">${formatMoney(-data.dividendos_pag)}</td></tr>
+          <tr><td class="pl-4">(+) Nueva Deuda Emitida</td><td class="text-right">${formatMoney(data.deuda_emitida)}</td></tr>
+          <tr><td class="pl-4">(-) Pago de Deuda</td><td class="text-right">${formatMoney(-data.deuda_pagada)}</td></tr>
+          <tr><td class="pl-4">(-) Dividendos Pagados</td><td class="text-right">${formatMoney(-data.dividendos_pag)}</td></tr>
 
-          <tr class="total-cell mt-4 border-t-2 border-black"><td class="pt-4">CAMBIO NETO EN EFECTIVO</td><td class="text-right">${formatMoney(
+          <tr class="total-cell mt-4 border-t-2 border-black"><td class="pt-4">CAMBIO NETO EN EFECTIVO</td><td class="text-right">${formatMoney(
             data.cambio_efectivo
         )}</td></tr>
-        </table>
-      </div>`;
+        </table>
+      </div>`;
         if ($('content-flujos')) $('content-flujos').innerHTML = html;
     }
 
     function renderPatrimonio(data) {
         const h = getReportHeader();
         const html = `
-      <div class="mb-4"><h2 class="text-2xl font-bold">Estado de Cambios en el Patrimonio Neto</h2><p class="text-sm">${h.companyName} — Periodo: ${h.reportDate}</p></div>
-      <div class="bg-slate-50 p-4 rounded-lg border" role="region">
-        <table class="w-full text-sm" id="patrimonio-tabla">
-          <tr><td>Utilidades Retenidas (inicio del periodo)</td><td class="text-right">${formatMoney(
+      <div class="mb-4"><h2 class="text-2xl font-bold">Estado de Cambios en el Patrimonio Neto</h2><p class="text-sm">${h.companyName} — Periodo: ${h.reportDate}</p></div>
+      <div class="bg-slate-50 p-4 rounded-lg border" role="region">
+        <table class="w-full text-sm" id="patrimonio-tabla">
+          <tr><td>Utilidades Retenidas (inicio del periodo)</td><td class="text-right">${formatMoney(
             data.utilidades_retenidas
         )}</td></tr>
-          <tr><td>(+) Utilidad Neta del Periodo</td><td class="text-right">${formatMoney(data.utilidad_neta)}</td></tr>
-          <tr><td>(-) Dividendos Pagados</td><td class="text-right">${formatMoney(-data.dividendos_pag)}</td></tr>
-          <tr class="total-cell"><td>Utilidades Retenidas (final del periodo)</td><td class="text-right">${formatMoney(
+          <tr><td>(+) Utilidad Neta del Periodo</td><td class="text-right">${formatMoney(data.utilidad_neta)}</td></tr>
+          <tr><td>(-) Dividendos Pagados</td><td class="text-right">${formatMoney(-data.dividendos_pag)}</td></tr>
+          <tr class="total-cell"><td>Utilidades Retenidas (final del periodo)</td><td class="text-right">${formatMoney(
             data.util_finales
         )}</td></tr>
-          <tr class="mt-4 border-t"><td class="pt-4">Capital Social</td><td class="text-right">${formatMoney(
+          <tr class="mt-4 border-t"><td class="pt-4">Capital Social</td><td class="text-right">${formatMoney(
             data.capital_social
         )}</td></tr>
-          <tr><td>Reservas</td><td class="text-right">${formatMoney(data.reservas)}</td></tr>
-          <tr class="total-cell mt-4 border-t-2 border-black"><td class="pt-4">PATRIMONIO TOTAL</td><td class="text-right">${formatMoney(
+          <tr><td>Reservas</td><td class="text-right">${formatMoney(data.reservas)}</td></tr>
+          <tr class="total-cell mt-4 border-t-2 border-black"><td class="pt-4">PATRIMONIO TOTAL</td><td class="text-right">${formatMoney(
             data.patrimonio_total
         )}</td></tr>
-        </table>
-      </div>`;
+        </table>
+      </div>`;
         if ($('content-patrimonio')) $('content-patrimonio').innerHTML = html;
     }
 
@@ -845,8 +854,8 @@
             }
 
             sheet.getCell('C1').value = `${$('companyName').value || 'Agronare'}\nReporte: ${$('reportDate').value
-                    ? new Date($('reportDate').value + 'T12:00:00').toLocaleDateString('es-MX')
-                    : new Date().toLocaleDateString('es-MX')
+                ? new Date($('reportDate').value + 'T12:00:00').toLocaleDateString('es-MX')
+                : new Date().toLocaleDateString('es-MX')
                 }`;
             sheet.getCell('C1').alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
             sheet.columns = [{ width: 36 }, { width: 18 }];
@@ -988,8 +997,7 @@
                 }
             }
 
-            // Usar una librería como 'marked' sería ideal en producción para convertir Markdown a HTML de forma segura.
-            // Por simplicidad aquí, hacemos un reemplazo básico.
+            // Render básico de Markdown
             const formattedHtml = responseText
                 .replace(/### (.*)/g, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')
                 .replace(/## (.*)/g, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>')
@@ -1157,7 +1165,7 @@
 
             inp.addEventListener('blur', (e) => {
                 const el = e.target;
-                const raw = parseNumberFromFormatted(el.dataset.raw || el.value);
+                const raw = clampNumber(parseNumberFromFormatted(el.dataset.raw || el.value)); // <--- clamp
                 el.dataset.raw = raw;
                 el.value = formatMoney(Number(raw || 0));
                 updateAll(false);
@@ -1187,6 +1195,28 @@
         }
     }
 
+    /* ---------- Control contable: el balance debe cuadrar ---------- */
+    function verifyBalance(data) {
+        const diff = (data.total_activos || 0) - ((data.total_pasivos || 0) + (data.patrimonio_total || 0));
+        const target = $('content-balance');
+        if (!target) return;
+
+        let warn = $('balance-warning');
+        if (!warn) {
+            warn = document.createElement('div');
+            warn.id = 'balance-warning';
+            target.prepend(warn);
+        }
+
+        if (Math.abs(diff) > 0.01) {
+            warn.className = 'mt-3 p-3 rounded border border-red-300 text-red-700 bg-red-50';
+            warn.textContent = `⚠️ El balance no cuadra: Activos − (Pasivos + Patrimonio) = ${formatMoney(diff)}. Revisa cifras.`;
+        } else {
+            warn.className = 'mt-3 p-3 rounded border border-green-300 text-green-700 bg-green-50';
+            warn.textContent = '✔️ Balance cuadrado.';
+        }
+    }
+
     /* ---------- Update all ---------- */
     function updateAll(saveLocal = true) {
         const data = calculateAll();
@@ -1194,6 +1224,7 @@
         renderResultados(data);
         renderFlujos(data);
         renderPatrimonio(data);
+        verifyBalance(data);   // <--- nuevo control
         const activeTab = document.querySelector('[role="tab"][aria-selected="true"]');
         if (activeTab && activeTab.id.includes('graficos')) renderRatiosAndCharts(data);
         if (saveLocal) saveToLocal(false);
@@ -1290,6 +1321,14 @@
             });
 
         if ($('companyLogoImg')) $('companyLogoImg').src = companyLogoDataUrl;
+
+        // Guardado rápido con Ctrl/Cmd + S
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                saveToLocal(true);
+            }
+        });
     }
 
     /* ---------- Inicialización ---------- */
@@ -1312,12 +1351,10 @@
     })();
 })();
 
-/* ------------------ Registro único del Service Worker ------------------
-   Evita dobles registros (tú también lo tenías en el HTML). Deja sólo este. */
+/* ------------------ Registro único del Service Worker ------------------ */
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', async () => {
         try {
-            // Usa el registro del scope raíz si ya existe
             const existing = await navigator.serviceWorker.getRegistration('/');
             if (!existing) {
                 const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
