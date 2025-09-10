@@ -1,0 +1,122 @@
+/* src/style.css - Tailwind entry point */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Personalizaciones */
+:root {
+    --brand: #10b981;
+}
+
+html.dark {
+    background: #071226;
+    color: #e6eef6;
+}
+
+.card {
+    @apply rounded-lg shadow-sm;
+}
+
+.input-field {
+    @apply border rounded-lg;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* ==== Estilos para inputs con símbolo de moneda (usa la clase .input-with-currency creada por JS) ==== */
+
+/* contenedor relativo para poder posicionar el badge */
+.input-with-currency {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 220px;
+}
+
+/* badge con símbolo de moneda (a la izquierda) */
+.input-with-currency .currency-badge {
+    position: absolute;
+    left: 12px;
+    /* distancia desde la izquierda del input */
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #374151;
+    /* gris oscuro */
+    background: transparent;
+    opacity: 0.95;
+}
+
+/* si prefieres el símbolo a la derecha, usa .currency-right en el wrapper */
+.input-with-currency.currency-right .currency-badge {
+    left: auto;
+    right: 12px;
+}
+
+/* estilo del input (texto alineado a la derecha, padding para dejar espacio al badge) */
+.input-with-currency input.input-field {
+    box-sizing: border-box;
+    text-align: right;
+    padding-right: 14px;
+    /* espacio para los separadores / decimales */
+    padding-left: 44px;
+    /* espacio para el badge izquierdo (ajusta si pones badge a la derecha) */
+    background: #ffffff;
+    border: 1px solid #e6e9ee;
+    border-radius: 10px;
+    height: 40px;
+    line-height: 1;
+    font-size: 1rem;
+    color: #0f172a;
+    transition: box-shadow .12s ease, border-color .12s ease;
+}
+
+/* cuando el wrapper tenga currency-right, invertir padding */
+.input-with-currency.currency-right input.input-field {
+    padding-left: 12px;
+    padding-right: 44px;
+}
+
+/* foco accesible */
+.input-with-currency input.input-field:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+    border-color: var(--brand);
+}
+
+/* placeholder / texto formateado (un poco más tenue) */
+.input-with-currency input.input-field::placeholder {
+    color: #94a3b8;
+}
+
+/* cuando el valor es negativo, podemos mostrar color rojo (si quieres) */
+/* el JS podría añadir una clase .neg en el wrapper si lo deseas; dejo la regla por si la activas */
+.input-with-currency.neg input.input-field {
+    color: #b91c1c;
+}
+
+/* estética de tarjetas/encabezado (pequeños ajustes) */
+.pdf-temp-header img {
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Si quieres que el header del PDF se imprima sin los controles, la clase .no-print ya está definida;
+   la siguiente regla ayuda a que en pantalla la toolbar aparezca compacta */
+.no-print [id^="btn-"] {
+    white-space: nowrap;
+}
+
+/* pequeña mejora responsive: inputs ocupan 100% en pantallas pequeñas */
+@media (max-width: 640px) {
+    .input-with-currency {
+        max-width: 100%;
+    }
+}

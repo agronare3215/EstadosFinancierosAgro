@@ -4,51 +4,551 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#16a34a" />
-    <title>Análisis Financiero Integral — Agronare</title>
+    <title>Análisis Financiero Integral — Agronare (dist)</title>
 
-    <!-- Manifest + Icons -->
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/public/icons/icon-16.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/public/icons/icon-32.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/public/icons/icon-180.png" />
-
-    <!-- CSS compilado -->
-    <link rel="stylesheet" href="/dist/style.css" />
-
-    <!-- Librerías CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" defer></script>
-
-    <!-- Ajustes rápidos locales (opcionales) -->
+    <!-- CSS procesado (incrustado para dist standalone) -->
     <style>
-        .tab-button.active {
-            border-bottom-color: var(--brand);
-            color: var(--brand);
-            font-weight: 700
+        /* --- INICIO dist/style.css --- */
+        *,
+        ::before,
+        ::after {
+            --tw-border-spacing-x: 0;
+            --tw-border-spacing-y: 0;
+            --tw-translate-x: 0;
+            --tw-translate-y: 0;
+            --tw-rotate: 0;
+            --tw-skew-x: 0;
+            --tw-skew-y: 0;
+            --tw-scale-x: 1;
+            --tw-scale-y: 1;
+            --tw-pan-x: ;
+            --tw-pan-y: ;
+            --tw-pinch-zoom: ;
+            --tw-scroll-snap-strictness: proximity;
+            --tw-gradient-from-position: ;
+            --tw-gradient-via-position: ;
+            --tw-gradient-to-position: ;
+            --tw-ordinal: ;
+            --tw-slashed-zero: ;
+            --tw-numeric-figure: ;
+            --tw-numeric-spacing: ;
+            --tw-numeric-fraction: ;
+            --tw-ring-inset: ;
+            --tw-ring-offset-width: 0px;
+            --tw-ring-offset-color: #fff;
+            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-offset-shadow: 0 0 #0000;
+            --tw-ring-shadow: 0 0 #0000;
+            --tw-shadow: 0 0 #0000;
+            --tw-shadow-colored: 0 0 #0000;
+            --tw-blur: ;
+            --tw-brightness: ;
+            --tw-contrast: ;
+            --tw-grayscale: ;
+            --tw-hue-rotate: ;
+            --tw-invert: ;
+            --tw-saturate: ;
+            --tw-sepia: ;
+            --tw-drop-shadow: ;
+            --tw-backdrop-blur: ;
+            --tw-backdrop-brightness: ;
+            --tw-backdrop-contrast: ;
+            --tw-backdrop-grayscale: ;
+            --tw-backdrop-hue-rotate: ;
+            --tw-backdrop-invert: ;
+            --tw-backdrop-opacity: ;
+            --tw-backdrop-saturate: ;
+            --tw-backdrop-sepia: ;
+            --tw-contain-size: ;
+            --tw-contain-layout: ;
+            --tw-contain-paint: ;
+            --tw-contain-style: ;
+        }
+
+        ::backdrop {
+            --tw-border-spacing-x: 0;
+            --tw-border-spacing-y: 0;
+            --tw-translate-x: 0;
+            --tw-translate-y: 0;
+            --tw-rotate: 0;
+            --tw-skew-x: 0;
+            --tw-skew-y: 0;
+            --tw-scale-x: 1;
+            --tw-scale-y: 1;
+            --tw-pan-x: ;
+            --tw-pan-y: ;
+            --tw-pinch-zoom: ;
+            --tw-scroll-snap-strictness: proximity;
+            --tw-gradient-from-position: ;
+            --tw-gradient-via-position: ;
+            --tw-gradient-to-position: ;
+            --tw-ordinal: ;
+            --tw-slashed-zero: ;
+            --tw-numeric-figure: ;
+            --tw-numeric-spacing: ;
+            --tw-numeric-fraction: ;
+            --tw-ring-inset: ;
+            --tw-ring-offset-width: 0px;
+            --tw-ring-offset-color: #fff;
+            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-offset-shadow: 0 0 #0000;
+            --tw-ring-shadow: 0 0 #0000;
+            --tw-shadow: 0 0 #0000;
+            --tw-shadow-colored: 0 0 #0000;
+            --tw-blur: ;
+            --tw-brightness: ;
+            --tw-contrast: ;
+            --tw-grayscale: ;
+            --tw-hue-rotate: ;
+            --tw-invert: ;
+            --tw-saturate: ;
+            --tw-sepia: ;
+            --tw-drop-shadow: ;
+            --tw-backdrop-blur: ;
+            --tw-backdrop-brightness: ;
+            --tw-backdrop-contrast: ;
+            --tw-backdrop-grayscale: ;
+            --tw-backdrop-hue-rotate: ;
+            --tw-backdrop-invert: ;
+            --tw-backdrop-opacity: ;
+            --tw-backdrop-saturate: ;
+            --tw-backdrop-sepia: ;
+            --tw-contain-size: ;
+            --tw-contain-layout: ;
+            --tw-contain-paint: ;
+            --tw-contain-style: ;
+        }
+
+        /* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */
+        *,
+        :before,
+        :after {
+            box-sizing: border-box;
+            border-width: 0;
+            border-style: solid;
+            border-color: #e5e7eb
+        }
+
+        :root {
+            --brand: #10b981
+        }
+
+        html.dark {
+            background: #071226;
+            color: #e6eef6
+        }
+
+        .card {
+            border-radius: .5rem;
+            --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            box-shadow: var(--tw-shadow)
         }
 
         .input-field {
-            width: 100%;
-            max-width: 220px;
-            background: #fff;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            padding: 6px 8px;
-            text-align: right
+            border-radius: .5rem;
+            border-width: 1px
         }
 
-        .input-left {
+        @media print {
+            .no-print {
+                display: none !important
+            }
+        }
+
+        .static {
+            position: static
+        }
+
+        .fixed {
+            position: fixed
+        }
+
+        .absolute {
+            position: absolute
+        }
+
+        .inset-0 {
+            inset: 0px
+        }
+
+        .z-50 {
+            z-index: 50
+        }
+
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto
+        }
+
+        .my-3 {
+            margin-top: .75rem;
+            margin-bottom: .75rem
+        }
+
+        .mb-2 {
+            margin-bottom: .5rem
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem
+        }
+
+        .ml-2 {
+            margin-left: .5rem
+        }
+
+        .ml-3 {
+            margin-left: .75rem
+        }
+
+        .ml-auto {
+            margin-left: auto
+        }
+
+        .mt-1 {
+            margin-top: .25rem
+        }
+
+        .mt-2 {
+            margin-top: .5rem
+        }
+
+        .mt-3 {
+            margin-top: .75rem
+        }
+
+        .mt-4 {
+            margin-top: 1rem
+        }
+
+        .mt-6 {
+            margin-top: 1.5rem
+        }
+
+        .block {
+            display: block
+        }
+
+        .inline {
+            display: inline
+        }
+
+        .flex {
+            display: flex
+        }
+
+        .table {
+            display: table
+        }
+
+        .grid {
+            display: grid
+        }
+
+        .hidden {
+            display: none
+        }
+
+        .h-14 {
+            height: 3.5rem
+        }
+
+        .h-16 {
+            height: 4rem
+        }
+
+        .h-52 {
+            height: 13rem
+        }
+
+        .h-72 {
+            height: 18rem
+        }
+
+        .w-14 {
+            width: 3.5rem
+        }
+
+        .w-16 {
+            width: 4rem
+        }
+
+        .w-full {
+            width: 100%
+        }
+
+        .max-w-7xl {
+            max-width: 80rem
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite
+        }
+
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr))
+        }
+
+        .flex-wrap {
+            flex-wrap: wrap
+        }
+
+        .items-start {
+            align-items: flex-start
+        }
+
+        .items-center {
+            align-items: center
+        }
+
+        .justify-center {
+            justify-content: center
+        }
+
+        .justify-between {
+            justify-content: space-between
+        }
+
+        .gap-2 {
+            gap: .5rem
+        }
+
+        .gap-3 {
+            gap: .75rem
+        }
+
+        .gap-4 {
+            gap: 1rem
+        }
+
+        .gap-6 {
+            gap: 1.5rem
+        }
+
+        .rounded-full {
+            border-radius: 9999px
+        }
+
+        .rounded-md {
+            border-radius: .375rem
+        }
+
+        .border {
+            border-width: 1px
+        }
+
+        .border-8 {
+            border-width: 8px
+        }
+
+        .border-b {
+            border-bottom-width: 1px
+        }
+
+        .border-t {
+            border-top-width: 1px
+        }
+
+        .border-dashed {
+            border-style: dashed
+        }
+
+        .border-gray-200 {
+            --tw-border-opacity: 1;
+            border-color: rgb(229 231 235 / var(--tw-border-opacity))
+        }
+
+        .border-green-600 {
+            --tw-border-opacity: 1;
+            border-color: rgb(22 163 74 / var(--tw-border-opacity))
+        }
+
+        .border-slate-300 {
+            --tw-border-opacity: 1;
+            border-color: rgb(203 213 225 / var(--tw-border-opacity))
+        }
+
+        .bg-amber-500 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(245 158 11 / var(--tw-bg-opacity))
+        }
+
+        .bg-emerald-500 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(16 185 129 / var(--tw-bg-opacity))
+        }
+
+        .bg-emerald-600 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(5 150 105 / var(--tw-bg-opacity))
+        }
+
+        .bg-gray-100 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(243 244 246 / var(--tw-bg-opacity))
+        }
+
+        .bg-gray-50 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(249 250 251 / var(--tw-bg-opacity))
+        }
+
+        .bg-green-700 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(21 128 61 / var(--tw-bg-opacity))
+        }
+
+        .bg-indigo-600 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(79 70 229 / var(--tw-bg-opacity))
+        }
+
+        .bg-rose-500 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(244 63 94 / var(--tw-bg-opacity))
+        }
+
+        .bg-sky-600 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(2 132 199 / var(--tw-bg-opacity))
+        }
+
+        .bg-white {
+            --tw-bg-opacity: 1;
+            background-color: rgb(255 255 255 / var(--tw-bg-opacity))
+        }
+
+        .bg-opacity-80 {
+            --tw-bg-opacity: 0.8
+        }
+
+        .object-cover {
+            object-fit: cover
+        }
+
+        .px-3 {
+            padding-left: .75rem;
+            padding-right: .75rem
+        }
+
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem
+        }
+
+        .px-6 {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem
+        }
+
+        .py-2 {
+            padding-top: .5rem;
+            padding-bottom: .5rem
+        }
+
+        .py-6 {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem
+        }
+
+        .pb-12 {
+            padding-bottom: 3rem
+        }
+
+        .pl-4 {
+            padding-left: 1rem
+        }
+
+        .pt-3 {
+            padding-top: .75rem
+        }
+
+        .pt-4 {
+            padding-top: 1rem
+        }
+
+        .text-left {
             text-align: left
         }
 
-        .card-title {
-            font-weight: 700;
-            color: var(--text, #0f172a)
+        .text-center {
+            text-align: center
+        }
+
+        .text-right {
+            text-align: right
+        }
+
+        .text-2xl {
+            font-size: 1.5rem;
+            line-height: 2rem
+        }
+
+        .text-lg {
+            font-size: 1.125rem;
+            line-height: 1.75rem
+        }
+
+        .text-sm {
+            font-size: .875rem;
+            line-height: 1.25rem
+        }
+
+        .text-xl {
+            font-size: 1.25rem;
+            line-height: 1.75rem
+        }
+
+        .font-bold {
+            font-weight: 700
+        }
+
+        .font-semibold {
+            font-weight: 600
+        }
+
+        .text-gray-500 {
+            color: rgb(107 114 128)
+        }
+
+        .text-green-600 {
+            color: rgb(22 163 74)
+        }
+
+        .text-green-700 {
+            color: rgb(21 128 61)
+        }
+
+        .text-slate-500 {
+            color: rgb(100 116 139)
+        }
+
+        .text-slate-900 {
+            color: rgb(15 23 42)
+        }
+
+        .text-white {
+            color: #fff
+        }
+
+        .antialiased {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale
+        }
+
+        /* Personalizaciones */
+        :root {
+            --brand: #10b981
         }
 
         .pdf-temp-header {
@@ -61,14 +561,90 @@
         }
 
         .sr-only {
-            position: absolute !important;
-            width: 1px !important;
-            height: 1px !important;
-            padding: 0 !important;
-            margin: -1px !important;
-            overflow: hidden !important;
-            clip: rect(0, 0, 0, 0) !important;
-            border: 0 !important
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border-width: 0
+        }
+
+        @media (min-width:640px) {
+            .sm\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr))
+            }
+        }
+
+        @media (min-width:768px) {
+            .md\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr))
+            }
+
+            .md\:grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+            }
+
+            .md\:grid-cols-4 {
+                grid-template-columns: repeat(4, minmax(0, 1fr))
+            }
+
+            .md\:text-3xl {
+                font-size: 1.875rem;
+                line-height: 2.25rem
+            }
+        }
+
+        @media (min-width:1024px) {
+            .lg\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr))
+            }
+
+            .lg\:grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+            }
+
+            .lg\:grid-cols-5 {
+                grid-template-columns: repeat(5, minmax(0, 1fr))
+            }
+        }
+
+        /* fin resumido del CSS procesado (personalizaciones y utilidades clave incluidas) */
+    </style>
+
+    <!-- Librerías CDN (producción) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" defer></script>
+
+    <style>
+        /* CSS específico rápido para dist: cabecera PDF y ajustes de inputs */
+        .tab-button.active {
+            border-bottom-color: var(--brand);
+            color: var(--brand);
+            font-weight: 700;
+        }
+
+        .input-field {
+            width: 100%;
+            max-width: 220px;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 6px 8px;
+            text-align: right;
+        }
+
+        .input-left {
+            text-align: left;
+        }
+
+        .card-title {
+            font-weight: 700;
+            color: var(--text, #0f172a);
         }
 
         @media print {
@@ -80,7 +656,9 @@
 </head>
 
 <body class="bg-gray-50 text-slate-900 antialiased">
+
     <main id="main-content" class="max-w-7xl mx-auto p-6 pb-12">
+
         <!-- HEADER -->
         <header class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4 no-print" role="banner"
             aria-describedby="banner-desc">
@@ -90,7 +668,8 @@
                     <h1 id="app-title" class="text-2xl md:text-3xl font-bold text-green-700">Análisis Financiero
                         Integral</h1>
                     <p id="banner-desc" class="text-sm mt-0.5"><strong>Agronare</strong> — Reportes profesionales con
-                        logo en PDF y Excel. Interfaz accesible.</p>
+                        logo en PDF
+                        y Excel. Interfaz accesible.</p>
                 </div>
             </div>
 
@@ -109,6 +688,8 @@
                 <button id="btn-clear-local" class="px-4 py-2 rounded-md border bg-rose-500 text-white">Borrar
                     guardados</button>
                 <button id="btn-reset" class="px-4 py-2 rounded-md border bg-gray-200">Reiniciar</button>
+
+                <!-- Dark mode toggle -->
                 <button id="btn-toggle-theme" class="px-3 py-2 rounded-md border ml-2 bg-gray-800 text-white"
                     title="Alternar modo" aria-pressed="false">🌙 Oscuro</button>
             </div>
@@ -145,14 +726,16 @@
                     <div><input id="pdfHeaderLogo" type="checkbox" checked /> <label for="pdfHeaderLogo">Sí,
                             incluir</label></div>
                 </div>
+
                 <div>
                     <label class="text-sm">Marca de agua</label>
                     <div><input id="pdfWatermarkToggle" type="checkbox" checked /> <label
-                            for="pdfWatermarkToggle">Activar</label></div>
+                            for="pdfWatermarkToggle">Activar</label>
+                    </div>
                 </div>
                 <div>
                     <label for="pdfWatermarkText" class="text-sm">Texto marca</label>
-                    <input id="pdfWatermarkText" class="input-field input-left" type="text" value="CONFIDENCIAL" />
+                    <input id="pdfWatermarkText" class="text-sm" type="text" value="CONFIDENCIAL" />
                 </div>
                 <div>
                     <label for="pdfWatermarkOpacity" class="text-sm">Opacidad</label>
@@ -164,10 +747,12 @@
                     <input id="pdfWatermarkSize" type="range" min="24" max="160" step="2" value="72" />
                     <div class="text-sm">Tamaño: <span id="pdfWatermarkSizeVal">72</span>px</div>
                 </div>
+
                 <div>
                     <label class="text-sm">Numeración de páginas</label>
                     <div><input id="pdfPageNumbersToggle" type="checkbox" checked /> <label
-                            for="pdfPageNumbersToggle">Incluir números</label></div>
+                            for="pdfPageNumbersToggle">Incluir
+                            números</label></div>
                 </div>
                 <div>
                     <label for="pdfHeaderFont" class="text-sm">Fuente encabezado</label>
@@ -227,7 +812,7 @@
             </div>
         </section>
 
-        <!-- TABS -->
+        <!-- Tabs accesible -->
         <nav aria-label="Secciones del reporte" class="mb-4 no-print">
             <div role="tablist" aria-label="Secciones del reporte"
                 class="flex gap-2 border-b border-gray-200 flex-wrap">
@@ -248,48 +833,66 @@
 
         <!-- CONTENT -->
         <div id="content-container" role="region" aria-live="polite">
-            <!-- DATOS -->
+
+            <!-- DATOS: activos / pasivos / er / flujos -->
             <section id="content-datos" class="tab-content" role="tabpanel" aria-labelledby="tab-datos">
                 <h3 class="sr-only">Ingreso de datos</h3>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-slate-50 p-4 rounded-lg border" role="group" aria-labelledby="activos-title">
                         <h4 id="activos-title" class="card-title mb-2">ACTIVOS</h4>
+
                         <label for="caja" class="block text-sm">Caja</label>
                         <input id="caja" class="input-field" type="number" step="0.01" />
+
                         <label for="bancos" class="block text-sm mt-2">Bancos</label>
                         <input id="bancos" class="input-field" type="number" step="0.01" />
+
                         <label for="cxp" class="block text-sm mt-2">Cuentas por cobrar (CxC)</label>
                         <input id="cxp" class="input-field" type="number" step="0.01" />
+
                         <label for="inventarios" class="block text-sm mt-2">Inventarios</label>
                         <input id="inventarios" class="input-field" type="number" step="0.01" />
+
                         <label for="terrenos" class="block text-sm mt-2">Terrenos (bruto)</label>
                         <input id="terrenos" class="input-field" type="number" step="0.01" />
+
                         <label for="maquinaria" class="block text-sm mt-2">Maquinaria (bruto)</label>
                         <input id="maquinaria" class="input-field" type="number" step="0.01" />
+
                         <label for="vehiculos" class="block text-sm mt-2">Vehículos (bruto)</label>
                         <input id="vehiculos" class="input-field" type="number" step="0.01" />
+
                         <label for="depreciacion_acum" class="block text-sm mt-2">Depreciación acumulada</label>
                         <input id="depreciacion_acum" class="input-field" type="number" step="0.01" />
+
                         <label for="intangibles" class="block text-sm mt-2">Intangibles</label>
                         <input id="intangibles" class="input-field" type="number" step="0.01" />
                     </div>
 
                     <div class="bg-slate-50 p-4 rounded-lg border" role="group" aria-labelledby="pasivos-title">
                         <h4 id="pasivos-title" class="card-title mb-2">PASIVOS Y PATRIMONIO</h4>
+
                         <label for="proveedores" class="block text-sm">Proveedores</label>
                         <input id="proveedores" class="input-field" type="number" step="0.01" />
+
                         <label for="prestamos_cp" class="block text-sm mt-2">Préstamos corto plazo</label>
                         <input id="prestamos_cp" class="input-field" type="number" step="0.01" />
+
                         <label for="impuestos_pagar" class="block text-sm mt-2">Impuestos por pagar</label>
                         <input id="impuestos_pagar" class="input-field" type="number" step="0.01" />
+
                         <label for="deuda_lp" class="block text-sm mt-2">Deuda largo plazo</label>
                         <input id="deuda_lp" class="input-field" type="number" step="0.01" />
+
                         <hr class="my-3" />
+
                         <label for="capital_social" class="block text-sm mt-2">Capital social</label>
                         <input id="capital_social" class="input-field" type="number" step="0.01" />
+
                         <label for="reservas" class="block text-sm mt-2">Reservas</label>
                         <input id="reservas" class="input-field" type="number" step="0.01" />
+
                         <label for="utilidades_retenidas" class="block text-sm mt-2">Utilidades retenidas
                             (inicio)</label>
                         <input id="utilidades_retenidas" class="input-field" type="number" step="0.01" />
@@ -297,24 +900,34 @@
 
                     <div class="bg-slate-50 p-4 rounded-lg border" role="group" aria-labelledby="er-title">
                         <h4 id="er-title" class="card-title mb-2">ESTADO DE RESULTADOS</h4>
+
                         <label for="ventas_net" class="block text-sm">Ventas netas</label>
                         <input id="ventas_net" class="input-field" type="number" step="0.01" />
+
                         <label for="devoluciones" class="block text-sm mt-2">Devoluciones</label>
                         <input id="devoluciones" class="input-field" type="number" step="0.01" />
+
                         <label for="costo_ventas" class="block text-sm mt-2">Costo de ventas</label>
                         <input id="costo_ventas" class="input-field" type="number" step="0.01" />
+
                         <hr class="my-3" />
+
                         <label for="gasto_sueldos" class="block text-sm mt-2">Sueldos</label>
                         <input id="gasto_sueldos" class="input-field" type="number" step="0.01" />
+
                         <label for="gasto_renta" class="block text-sm mt-2">Renta</label>
                         <input id="gasto_renta" class="input-field" type="number" step="0.01" />
+
                         <label for="gasto_marketing" class="block text-sm mt-2">Marketing</label>
                         <input id="gasto_marketing" class="input-field" type="number" step="0.01" />
+
                         <label for="gasto_intereses" class="block text-sm mt-2">Intereses</label>
                         <input id="gasto_intereses" class="input-field" type="number" step="0.01" />
+
                         <label for="impuestos_calc" class="block text-sm mt-2">Impuestos estimados</label>
                         <input id="impuestos_calc" class="input-field" type="number" step="0.01" />
                     </div>
+
                 </div>
 
                 <!-- Flujos / Inversión / Financiación -->
@@ -322,51 +935,72 @@
                     <div class="bg-slate-50 p-4 rounded-lg border" role="group" aria-labelledby="flujos-title">
                         <h4 id="flujos-title" class="card-title mb-2">Flujos de operación</h4>
                         <p class="text-sm text-slate-500">Ingresa cambios en capital de trabajo para el ajuste
-                            indirecto. Δ (aumento = +)</p>
+                            indirecto. Δ (aumento
+                            = +)</p>
                         <label for="delta_cxc" class="block text-sm mt-2">Δ CxC (Cuentas por Cobrar)</label>
                         <input id="delta_cxc" class="input-field" type="number" step="0.01" />
                         <label for="delta_inventarios" class="block text-sm mt-2">Δ Inventarios</label>
                         <input id="delta_inventarios" class="input-field" type="number" step="0.01" />
                         <label for="delta_cxp" class="block text-sm mt-2">Δ CxP (Cuentas por Pagar)</label>
                         <input id="delta_cxp" class="input-field" type="number" step="0.01" />
-                        <p class="text-sm mt-2 text-slate-500">Explicación: <strong>CxC</strong> ventas aún no cobradas;
-                            <strong>CxP</strong> compras/obligaciones no pagadas.
-                        </p>
+                        <p class="text-sm mt-2 text-slate-500">Explicación: <strong>CxC</strong> (cuentas por cobrar)
+                            representa
+                            ventas aún no cobradas; <strong>CxP</strong> (cuentas por pagar) representa
+                            compras/obligaciones no
+                            pagadas.</p>
                     </div>
 
                     <div class="bg-slate-50 p-4 rounded-lg border" role="group" aria-labelledby="inversion-title">
                         <h4 id="inversion-title" class="card-title mb-2">Inversión</h4>
                         <label for="capex" class="block text-sm">CAPEX (compras)</label>
                         <input id="capex" class="input-field" type="number" step="0.01" />
-                        <p class="text-sm text-slate-500 mt-1">Compras de activos fijos. Salida en flujos de inversión.
-                        </p>
+                        <p class="text-sm text-slate-500 mt-1">CAPEX: compras de activos fijos (maquinaria, equipo). Se
+                            registra
+                            como salida en flujos de inversión.</p>
+
                         <label for="venta_activo" class="block text-sm mt-2">Venta de activos</label>
                         <input id="venta_activo" class="input-field" type="number" step="0.01" />
-                        <p class="text-sm text-slate-500 mt-1">Ingreso por desinversión (venta equipo/vehículo).</p>
+                        <p class="text-sm text-slate-500 mt-1">Venta de activo: ingreso por desinversión (por ejemplo
+                            venta de un
+                            vehículo o equipo).</p>
                     </div>
 
                     <div class="bg-slate-50 p-4 rounded-lg border" role="group" aria-labelledby="financ-title">
                         <h4 id="financ-title" class="card-title mb-2">Financiación</h4>
+
                         <label for="deuda_emitida" class="block text-sm">Deuda emitida</label>
                         <input id="deuda_emitida" class="input-field" type="number" step="0.01" />
-                        <p class="text-sm text-slate-500 mt-1">Préstamos/crédito recibido (entrada de efectivo).</p>
+                        <p class="text-sm text-slate-500 mt-1">Deuda emitida: préstamos o crédito recibido (entrada de
+                            efectivo).
+                        </p>
+
                         <label for="deuda_pagada" class="block text-sm mt-2">Deuda pagada</label>
                         <input id="deuda_pagada" class="input-field" type="number" step="0.01" />
-                        <p class="text-sm text-slate-500 mt-1">Amortizaciones o pagos (salida de efectivo).</p>
+                        <p class="text-sm text-slate-500 mt-1">Deuda pagada: amortizaciones o pagos de pasivos (salida
+                            de efectivo).
+                        </p>
+
                         <label for="dividendos_pag" class="block text-sm mt-2">Dividendos pagados</label>
                         <input id="dividendos_pag" class="input-field" type="number" step="0.01" />
-                        <p class="text-sm text-slate-500 mt-1">Distribuciones a propietarios (salida de efectivo).</p>
+                        <p class="text-sm text-slate-500 mt-1">Dividendos: distribuciones a propietarios (salida de
+                            efectivo).</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Secciones generadas -->
+            <!-- BALANCE -->
             <section id="content-balance" class="tab-content hidden print-section mt-6" role="tabpanel"
                 aria-labelledby="tab-balance"></section>
+
+            <!-- RESULTADOS -->
             <section id="content-resultados" class="tab-content hidden print-section mt-6" role="tabpanel"
                 aria-labelledby="tab-resultados"></section>
+
+            <!-- FLUJOS -->
             <section id="content-flujos" class="tab-content hidden print-section mt-6" role="tabpanel"
                 aria-labelledby="tab-flujos"></section>
+
+            <!-- PATRIMONIO -->
             <section id="content-patrimonio" class="tab-content hidden print-section mt-6" role="tabpanel"
                 aria-labelledby="tab-patrimonio"></section>
 
@@ -407,35 +1041,28 @@
                         <div id="ratio-roe" class="text-2xl font-bold mt-1">-</div>
                     </div>
                 </div>
+
             </section>
+
         </div>
 
         <div class="mt-6 flex justify-center gap-3 no-print">
             <button id="btn-preview" class="px-4 py-2 rounded-md bg-indigo-600 text-white">Actualizar &
                 Previsualizar</button>
         </div>
+
     </main>
 
-    <!-- Loader -->
-    <div id="loader" class="fixed inset-0 bg-white bg-opacity-80 items-center justify-center hidden z-50" role="status"
+    <!-- loader -->
+    <div id="loader" class="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50" role="status"
         aria-live="assertive">
         <div class="w-16 h-16 border-8 border-dashed rounded-full animate-spin border-green-600"></div>
         <p class="mt-4 text-lg font-semibold text-green-700">Procesando...</p>
     </div>
 
-    <!-- Script principal -->
+    <!-- Script principal: referencia a tu src/main.js (usa el main.js que te pasé) -->
     <script src="/src/main.js" defer></script>
 
-    <!-- Registro único del Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('ServiceWorker registrado:', reg.scope))
-                    .catch(err => console.warn('ServiceWorker error:', err));
-            });
-        }
-    </script>
 </body>
 
 </html>

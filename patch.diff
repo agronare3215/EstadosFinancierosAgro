@@ -1,0 +1,220 @@
+diff --git a/index.html b/index.html
+--- a/index.html
++++ b/index.html
+@@ -83,13 +83,16 @@
+-        <div>
+-          <label for="pdfWatermarkText" class="text-sm">Texto marca</label>
+-          <input id="pdfWatermarkText" class="input-field input-left" type="text" value="CONFIDENCIAL" />
+-        </div>
++        <div>
++          <label for="pdfWatermarkText" class="text-sm">Texto marca</label>
++          <!-- no-currency: evitar que el JS inserte símbolo / formatee este campo -->
++          <input id="pdfWatermarkText" class="input-field input-left no-currency" data-no-currency="true" type="text" value="CONFIDENCIAL" />
++        </div>
+@@ -99,8 +102,11 @@
+-        <div>
+-          <label for="pdfHeaderFont" class="text-sm">Fuente encabezado</label>
+-          <input id="pdfHeaderFont" class="input-field input-left" type="text" value="Inter, Arial, sans-serif" />
+-        </div>
++        <div>
++          <label for="pdfHeaderFont" class="text-sm">Fuente encabezado</label>
++          <!-- no-currency: evitar que el JS inserte símbolo / formatee este campo -->
++          <input id="pdfHeaderFont" class="input-field input-left no-currency" data-no-currency="true" type="text" value="Inter, Arial, sans-serif" />
++        </div>
+diff --git a/src/main.js b/src/main.js
+--- a/src/main.js
++++ b/src/main.js
+@@
+-/* ---------- Inputs formateados: focus/blur handlers ---------- */
+-function attachCurrencyFormattingToInputs() {
+-    // selecciona inputs con clase input-field
+-    const inputs = Array.from(document.querySelectorAll('input.input-field'));
+-    inputs.forEach(inp => {
+-        // convertimos a text para permitir "$1,000.00"
+-        try { inp.type = 'text'; } catch (e) { /* algunos navegadores no permiten cambiar, ignorar */ }
+-
+-        // si no tiene dataset.raw, inicializamos
+-        if (!inp.dataset.raw || inp.dataset.raw === '') {
+-            // si hay valor actual (posible formato), parsearlo
+-            const initialParsed = parseNumberFromFormatted(inp.value);
+-            inp.dataset.raw = Number.isFinite(initialParsed) ? initialParsed : '';
+-            // formatear visualmente
+-            inp.value = formatMoney(parseNumberFromFormatted(inp.dataset.raw || 0));
+-        } else {
+-            // formato con moneda
+-            inp.value = formatMoney(parseNumberFromFormatted(inp.dataset.raw));
+-        }
+-
+-        // focus -> mostrar número crudo para editar
+-        inp.addEventListener('focus', (e) => {
+-            const el = e.target;
+-            const raw = el.dataset.raw;
+-            // mostrar sin formato; mantener si vacío
+-            el.value = (raw || raw === 0) ? String(Number(raw)) : '';
+-            // mover cursor al final
+-            try { el.setSelectionRange(el.value.length, el.value.length); } catch (err) { /* ignore */ }
+-        });
+-
+-        // input -> actualizar dataset.raw conforme usuario escribe
+-        inp.addEventListener('input', (e) => {
+-            const el = e.target;
+-            // permitimos solo caracteres numericos, punto y guion; parseamos lo que haya
+-            const parsed = parseNumberFromFormatted(el.value);
+-            if (!Number.isFinite(parsed) && el.value.trim() === '') {
+-                el.dataset.raw = '';
+-            } else {
+-                el.dataset.raw = parsed;
+-            }
+-        });
+-
+-        // blur -> formatear con moneda y guardar dataset.raw
+-        inp.addEventListener('blur', (e) => {
+-            const el = e.target;
+-            const raw = parseNumberFromFormatted(el.dataset.raw || el.value);
+-            el.dataset.raw = raw;
+-            el.value = formatMoney(Number(raw || 0));
+-            // al perder focus recalculamos todo
+-            updateAll(false);
+-        });
+-
+-        // tecla Enter en input -> perder focus y formatear
+-        inp.addEventListener('keydown', (e) => {
+-            if (e.key === 'Enter') {
+-                e.preventDefault();
+-                e.target.blur();
+-            }
+-        });
+-    });
+-}
++/* ---------- Inputs formateados: focus/blur handlers ---------- */
++function attachCurrencyFormattingToInputs() {
++    // selecciona inputs con clase input-field
++    const inputs = Array.from(document.querySelectorAll('input.input-field'));
++
++    // helper: detecta si el campo o su wrapper piden explícitamente NO formatear como moneda
++    const isNoCurrency = (el) => {
++        if (!el) return false;
++        if (el.classList.contains('no-currency')) return true;
++        if (el.getAttribute('data-no-currency') === 'true') return true;
++        if (el.closest && el.closest('[data-no-currency="true"]')) return true;
++        return false;
++    };
++
++    // actualiza todos los badges visibles con el símbolo de la moneda actual
++    function updateCurrencyBadges() {
++        const sym = getCurrencySymbol(currencyCode());
++        document.querySelectorAll('.input-with-currency .currency-badge').forEach(b => {
++            b.textContent = sym;
++        });
++    }
++
++    inputs.forEach(inp => {
++        // evitar doble inicialización
++        if (inp.dataset.currencyInit === '1') return;
++
++        // Si el input está marcado para NO mostrar moneda, sólo aplicar handlers ligeros
++        const skipCurrency = isNoCurrency(inp);
++
++        // convertimos a text para permitir "$1,000.00" en inputs numéricos
++        try { inp.type = 'text'; } catch (e) { /* algunos navegadores no permiten cambiar, ignorar */ }
++
++        // Si no es skipCurrency, envolvemos en .input-with-currency y añadimos badge (si no existe)
++        if (!skipCurrency) {
++            const parent = inp.parentElement;
++            // si el input ya está dentro de un wrapper .input-with-currency, reutilizamos
++            if (!parent || !parent.classList.contains('input-with-currency')) {
++                const wrapper = document.createElement('div');
++                wrapper.className = 'input-with-currency';
++                // mover el input dentro del wrapper, y reemplazar en DOM
++                inp.replaceWith(wrapper);
++                wrapper.appendChild(inp);
++                // crear badge
++                const badge = document.createElement('span');
++                badge.className = 'currency-badge';
++                badge.setAttribute('aria-hidden', 'true');
++                badge.textContent = getCurrencySymbol(currencyCode());
++                wrapper.insertBefore(badge, inp);
++            } else {
++                // si wrapper existe pero no tiene badge, crearla
++                if (!parent.querySelector('.currency-badge')) {
++                    const badge = document.createElement('span');
++                    badge.className = 'currency-badge';
++                    badge.setAttribute('aria-hidden', 'true');
++                    badge.textContent = getCurrencySymbol(currencyCode());
++                    parent.insertBefore(badge, inp);
++                }
++            }
++        } else {
++            // si skipCurrency: asegurarse que no exista wrapper con badge que lo afecte visualmente
++            const maybeWrapper = inp.closest('.input-with-currency');
++            if (maybeWrapper) {
++                maybeWrapper.classList.add('no-currency');
++                maybeWrapper.setAttribute('data-no-currency', 'true');
++            }
++        }
++
++        // si no tiene dataset.raw, inicializamos
++        if (!inp.dataset.raw || inp.dataset.raw === '') {
++            const initialParsed = parseNumberFromFormatted(inp.value);
++            inp.dataset.raw = Number.isFinite(initialParsed) ? initialParsed : '';
++            inp.value = formatMoney(parseNumberFromFormatted(inp.dataset.raw || 0));
++        } else {
++            inp.value = formatMoney(parseNumberFromFormatted(inp.dataset.raw));
++        }
++
++        // focus -> mostrar número crudo para editar
++        inp.addEventListener('focus', (e) => {
++            const el = e.target;
++            const raw = el.dataset.raw;
++            el.value = (raw || raw === 0) ? String(Number(raw)) : '';
++            try { el.setSelectionRange(el.value.length, el.value.length); } catch (err) { /* ignore */ }
++        });
++
++        // input -> actualizar dataset.raw conforme usuario escribe
++        inp.addEventListener('input', (e) => {
++            const el = e.target;
++            const parsed = parseNumberFromFormatted(el.value);
++            if (!Number.isFinite(parsed) && el.value.trim() === '') {
++                el.dataset.raw = '';
++            } else {
++                el.dataset.raw = parsed;
++            }
++        });
++
++        // blur -> formatear con moneda (o sin símbolo si isPdfMode) y guardar dataset.raw
++        inp.addEventListener('blur', (e) => {
++            const el = e.target;
++            const raw = parseNumberFromFormatted(el.dataset.raw || el.value);
++            el.dataset.raw = raw;
++            el.value = formatMoney(Number(raw || 0));
++            // al perder focus recalculamos todo
++            updateAll(false);
++        });
++
++        // tecla Enter en input -> perder focus y formatear
++        inp.addEventListener('keydown', (e) => {
++            if (e.key === 'Enter') {
++                e.preventDefault();
++                e.target.blur();
++            }
++        });
++
++        // marcar como inicializado para evitar re-attach de listeners si se vuelve a llamar
++        inp.dataset.currencyInit = '1';
++    });
++
++    // actualizar badges si cambia la moneda (evitar duplicados: sólo attach una vez)
++    const curSel = document.getElementById('currencySelect');
++    if (curSel && !curSel.dataset._hasBadgeListener) {
++        curSel.addEventListener('change', () => {
++            document.querySelectorAll('input.input-field').forEach(inp => {
++                const raw = parseNumberFromFormatted(inp.dataset.raw || inp.value);
++                inp.value = formatMoney(raw);
++            });
++            // actualizar badge symbols
++            const sym = getCurrencySymbol(currencyCode());
++            document.querySelectorAll('.input-with-currency .currency-badge').forEach(b => b.textContent = sym);
++        });
++        curSel.dataset._hasBadgeListener = '1';
++    }
++}

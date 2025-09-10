@@ -1,15 +1,26 @@
 {
-  "name": "Agronare - Metadatos Avanzados",
-  "short_name": "AgronareMeta",
-  "start_url": "./index.html",
+  "name": "Estados Financieros — Agronare",
+  "short_name": "Agronare",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#16a34a",
   "icons": [
     {
-      "src": "logo.jpg",
-      "sizes": "512x512",
-      "type": "image/jpeg"
+      "src": "/public/icons/icon-16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/public/icons/icon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/public/icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
