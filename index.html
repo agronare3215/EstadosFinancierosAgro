@@ -101,9 +101,16 @@
                     XLSX</button>
                 <button id="btn-export-pdf" class="px-4 py-2 rounded-md border bg-sky-600 text-white">Exportar
                     PDF</button>
-                <input id="file-load" type="file" accept=".json" class="hidden" />
-                <button id="btn-load-json" class="px-4 py-2 rounded-md border bg-amber-500 text-white">Cargar
-                    JSON</button>
+                <!-- Input real, oculto pero con soporte a lectores -->
+                <input id="file-load" type="file" accept=".json" class="sr-only" aria-hidden="true" tabindex="-1" />
+
+                <!-- El “botón” accesible es el label -->
+                <label for="file-load" id="btn-load-json" role="button"
+                    class="px-4 py-2 rounded-md border bg-amber-500 text-white cursor-pointer">
+                    Cargar JSON
+                </label>
+
+                JSON</button>
                 <button id="btn-save-local" class="px-4 py-2 rounded-md border bg-emerald-500 text-white">Guardar en
                     navegador</button>
                 <button id="btn-clear-local" class="px-4 py-2 rounded-md border bg-rose-500 text-white">Borrar
